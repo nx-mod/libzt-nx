@@ -1,15 +1,10 @@
-/*
- * Copyright (c)2013-2021 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2026-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_BOND_HPP
 #define ZT_BOND_HPP
@@ -23,7 +18,6 @@
 
 #include <cstdarg>
 #include <deque>
-#include <list>
 #include <map>
 
 /**
@@ -315,7 +309,6 @@ class Peer;
 
 class Bond {
   public:
-
 	/**
 	 * Stop bond's internal functions (can be resumed)
 	 */
@@ -909,7 +902,8 @@ class Bond {
 		_lastAckRateCheck = now;
 		if (_ackCutoffCount > numToDrain) {
 			_ackCutoffCount -= numToDrain;
-		} else {
+		}
+		else {
 			_ackCutoffCount = 0;
 		}
 		return (_ackCutoffCount < ZT_ACK_CUTOFF_LIMIT);
@@ -928,7 +922,8 @@ class Bond {
 		uint64_t diff = now - _lastQoSRateCheck;
 		if ((diff) <= (_qosSendInterval / ZT_MAX_PEER_NETWORK_PATHS)) {
 			++_qosCutoffCount;
-		} else {
+		}
+		else {
 			_qosCutoffCount = 0;
 		}
 		_lastQoSRateCheck = now;
@@ -948,7 +943,8 @@ class Bond {
 		int diff = now - _lastPathNegotiationReceived;
 		if ((diff) <= (ZT_PATH_NEGOTIATION_CUTOFF_TIME / ZT_MAX_PEER_NETWORK_PATHS)) {
 			++_pathNegotiationCutoffCount;
-		} else {
+		}
+		else {
 			_pathNegotiationCutoffCount = 0;
 		}
 		_lastPathNegotiationReceived = now;
@@ -1142,6 +1138,7 @@ class Bond {
 		__attribute__((format(printf, 2, 3)))
 #endif
 	{
+		// if (_peerId != 0x0 && _peerId != 0x0) { return; }
 #ifdef ZT_TRACE
 		time_t rawtime;
 		struct tm* timeinfo;
@@ -1173,6 +1170,7 @@ class Bond {
 		__attribute__((format(printf, 2, 3)))
 #endif
 	{
+		// if (_peerId != 0x0 && _peerId != 0x0) { return; }
 #ifdef ZT_DEBUG
 		time_t rawtime;
 		struct tm* timeinfo;
@@ -1230,6 +1228,7 @@ class Bond {
 			, packetsReceivedSinceLastQoS(0)
 			, packetsIn(0)
 			, packetsOut(0)
+			, localPort(0)
 		{
 		}
 
@@ -1245,17 +1244,20 @@ class Bond {
 				unsigned int suggestedRefractoryPeriod = refractoryPeriod ? punishment + (refractoryPeriod * 2) : punishment;
 				refractoryPeriod = std::min(suggestedRefractoryPeriod, (unsigned int)ZT_BOND_MAX_REFRACTORY_PERIOD);
 				lastRefractoryUpdate = 0;
-			} else {
+			}
+			else {
 				uint32_t drainRefractory = 0;
 				if (lastRefractoryUpdate) {
 					drainRefractory = (now - lastRefractoryUpdate);
-				} else {
+				}
+				else {
 					drainRefractory = (now - lastAliveToggle);
 				}
 				lastRefractoryUpdate = now;
 				if (refractoryPeriod > drainRefractory) {
 					refractoryPeriod -= drainRefractory;
-				} else {
+				}
+				else {
 					refractoryPeriod = 0;
 					lastRefractoryUpdate = 0;
 				}
@@ -1292,7 +1294,6 @@ class Bond {
 		 */
 		inline bool needsToSendQoS(int64_t now, uint64_t qosSendInterval)
 		{
-			// fprintf(stderr, "QOS table (%d / %d)\n", packetsReceivedSinceLastQoS, ZT_QOS_TABLE_SIZE);
 			return ((packetsReceivedSinceLastQoS >= ZT_QOS_TABLE_SIZE) || ((now - lastQoSMeasurement) > qosSendInterval)) && packetsReceivedSinceLastQoS;
 		}
 
@@ -1363,6 +1364,8 @@ class Bond {
 		 */
 		int packetsIn;
 		int packetsOut;
+
+		uint16_t localPort;
 
 		// AtomicCounter __refCount;
 

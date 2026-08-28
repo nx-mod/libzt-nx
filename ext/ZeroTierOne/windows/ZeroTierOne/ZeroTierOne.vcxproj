@@ -39,12 +39,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\controller\DB.cpp" />
-    <ClCompile Include="..\..\controller\DBMirrorSet.cpp" />
-    <ClCompile Include="..\..\controller\EmbeddedNetworkController.cpp" />
-    <ClCompile Include="..\..\controller\FileDB.cpp" />
-    <ClCompile Include="..\..\controller\LFDB.cpp" />
-    <ClCompile Include="..\..\controller\PostgreSQL.cpp" />
     <ClCompile Include="..\..\ext\http-parser\http_parser.c" />
     <ClCompile Include="..\..\ext\libnatpmp\getgateway.c" />
     <ClCompile Include="..\..\ext\libnatpmp\natpmp.c" />
@@ -66,17 +60,10 @@
     <ClCompile Include="..\..\node\AES_aesni.cpp" />
     <ClCompile Include="..\..\node\AES_armcrypto.cpp" />
     <ClCompile Include="..\..\node\Bond.cpp" />
-    <ClCompile Include="..\..\node\C25519.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MaxSpeed</Optimization>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">MaxSpeed</Optimization>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</BasicRuntimeChecks>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</BasicRuntimeChecks>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Default</BasicRuntimeChecks>
-    </ClCompile>
     <ClCompile Include="..\..\node\Capability.cpp" />
     <ClCompile Include="..\..\node\CertificateOfMembership.cpp" />
     <ClCompile Include="..\..\node\CertificateOfOwnership.cpp" />
+    <ClCompile Include="..\..\node\ECC.cpp" />
     <ClCompile Include="..\..\node\Identity.cpp" />
     <ClCompile Include="..\..\node\IncomingPacket.cpp" />
     <ClCompile Include="..\..\node\InetAddress.cpp" />
@@ -88,6 +75,7 @@
     <ClCompile Include="..\..\node\Node.cpp" />
     <ClCompile Include="..\..\node\OutboundMulticast.cpp" />
     <ClCompile Include="..\..\node\Packet.cpp" />
+    <ClCompile Include="..\..\node\PacketMultiplexer.cpp" />
     <ClCompile Include="..\..\node\Path.cpp" />
     <ClCompile Include="..\..\node\Peer.cpp" />
     <ClCompile Include="..\..\node\Poly1305.cpp">
@@ -107,6 +95,14 @@
     <ClCompile Include="..\..\node\Topology.cpp" />
     <ClCompile Include="..\..\node\Trace.cpp" />
     <ClCompile Include="..\..\node\Utils.cpp" />
+    <ClCompile Include="..\..\nonfree\controller\CtlUtil.cpp" />
+    <ClCompile Include="..\..\nonfree\controller\CV1.cpp" />
+    <ClCompile Include="..\..\nonfree\controller\CV2.cpp" />
+    <ClCompile Include="..\..\nonfree\controller\DB.cpp" />
+    <ClCompile Include="..\..\nonfree\controller\DBMirrorSet.cpp" />
+    <ClCompile Include="..\..\nonfree\controller\EmbeddedNetworkController.cpp" />
+    <ClCompile Include="..\..\nonfree\controller\FileDB.cpp" />
+    <ClCompile Include="..\..\nonfree\controller\PostgreSQL.cpp" />
     <ClCompile Include="..\..\one.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">false</ExcludedFromBuild>
@@ -138,7 +134,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|ARM64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\service\OneService.cpp" />
-    <ClCompile Include="..\..\service\SoftwareUpdater.cpp" />
     <ClCompile Include="ServiceBase.cpp" />
     <ClCompile Include="ServiceInstaller.cpp" />
     <ClCompile Include="ZeroTierOneService.cpp">
@@ -163,13 +158,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\controller\DB.hpp" />
-    <ClInclude Include="..\..\controller\DBMirrorSet.hpp" />
-    <ClInclude Include="..\..\controller\EmbeddedNetworkController.hpp" />
-    <ClInclude Include="..\..\controller\FileDB.hpp" />
-    <ClInclude Include="..\..\controller\LFDB.hpp" />
-    <ClInclude Include="..\..\controller\PostgreSQL.hpp" />
-    <ClInclude Include="..\..\controller\Redis.hpp" />
     <ClInclude Include="..\..\ext\cpp-httplib\httplib.h" />
     <ClInclude Include="..\..\ext\http-parser\http_parser.h" />
     <ClInclude Include="..\..\ext\json\json.hpp" />
@@ -199,7 +187,7 @@
     <ClInclude Include="..\..\node\Bond.hpp" />
     <ClInclude Include="..\..\node\BondController.hpp" />
     <ClInclude Include="..\..\node\Buffer.hpp" />
-    <ClInclude Include="..\..\node\C25519.hpp" />
+    <ClInclude Include="..\..\node\ECC.hpp" />
     <ClInclude Include="..\..\node\CertificateOfMembership.hpp" />
     <ClInclude Include="..\..\node\CertificateOfOwnership.hpp" />
     <ClInclude Include="..\..\node\Constants.hpp" />
@@ -234,6 +222,16 @@
     <ClInclude Include="..\..\node\Trace.hpp" />
     <ClInclude Include="..\..\node\Utils.hpp" />
     <ClInclude Include="..\..\node\World.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\ConnectionPool.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\CtlUtil.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\CV1.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\CV2.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\DB.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\DBMirrorSet.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\EmbeddedNetworkController.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\FileDB.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\PostgreSQL.hpp" />
+    <ClInclude Include="..\..\nonfree\controller\Redis.hpp" />
     <ClInclude Include="..\..\osdep\Binder.hpp" />
     <ClInclude Include="..\..\osdep\EthernetTap.hpp" />
     <ClInclude Include="..\..\osdep\Http.hpp" />
@@ -246,7 +244,6 @@
     <ClInclude Include="..\..\osdep\WindowsEthernetTap.hpp" />
     <ClInclude Include="..\..\osdep\WinFWHelper.hpp" />
     <ClInclude Include="..\..\service\OneService.hpp" />
-    <ClInclude Include="..\..\service\SoftwareUpdater.hpp" />
     <ClInclude Include="..\..\version.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ServiceBase.h" />
@@ -414,7 +411,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>${SolutionDir)\..\ext\opentelemetry-cpp-api-only;$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\rustybits\target;$(SolutionDir)\..\ext\opentelemetry-cpp-api-only\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;NOMINMAX;STATICLIB;WIN32;ZT_TRACE;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="disable";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -428,7 +425,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>wsock32.lib;ws2_32.lib;Iphlpapi.lib;Rpcrt4.lib;zeroidc.lib;bcrypt.lib;userenv.lib;crypt32.lib;secur32.lib;ncrypt.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\zeroidc\target\i686-pc-windows-msvc\debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\rustybits\target\i686-pc-windows-msvc\debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
@@ -436,7 +433,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\rustybits\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;NOMINMAX;STATICLIB;WIN32;ZT_TRACE;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="disable";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -457,7 +454,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>${SolutionDir)\..\ext\opentelemetry-cpp-api-only;$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\rustybits\target;$(SolutionDir)\..\ext\opentelemetry-cpp-api-only\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;NOMINMAX;STATICLIB;WIN32;ZT_TRACE;ZT_RULES_ENGINE_DEBUGGING;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="disable";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -472,7 +469,7 @@
       <AdditionalDependencies>wbemuuid.lib;wsock32.lib;ws2_32.lib;Iphlpapi.lib;Rpcrt4.lib;zeroidc.lib;bcrypt.lib;userenv.lib;crypt32.lib;secur32.lib;ncrypt.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <AdditionalOptions>"notelemetry.obj" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\zeroidc\target\x86_64-pc-windows-msvc\debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\rustybits\target\x86_64-pc-windows-msvc\debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -480,12 +477,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\rustybits\target;$(SolutionDir)\..\ext\opentelemetry-cpp-api-only\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ZT_EXPORT;FD_SETSIZE=1024;NOMINMAX;STATICLIB;WIN32;ZT_TRACE;ZT_RULES_ENGINE_DEBUGGING;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="disable";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <GuardEHContMetadata>false</GuardEHContMetadata>
@@ -494,8 +491,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>wbemuuid.lib;wsock32.lib;ws2_32.lib;Iphlpapi.lib;Rpcrt4.lib;zeroidc.lib;bcrypt.lib;userenv.lib;crypt32.lib;secur32.lib;ncrypt.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalOptions>"notelemetry.obj" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\zeroidc\target\x86_64-pc-windows-msvc\debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\rustybits\target\aarch64-pc-windows-msvc\debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
@@ -503,7 +499,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\rustybits\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;NOMINMAX;STATICLIB;WIN32;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="disable";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -525,7 +521,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\rustybits\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ZT_EXPORT;FD_SETSIZE=1024;NOMINMAX;STATICLIB;WIN32;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="disable";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -549,8 +545,8 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;STATICLIB;ZT_SALSA20_SSE;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;WIN32;NOMINMAX;ZT_SOFTWARE_UPDATE_DEFAULT="apply";ZT_BUILD_PLATFORM=2;ZT_BUILD_ARCHITECTURE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\rustybits\target;$(SolutionDir)\..\ext\opentelemetry-cpp-api-only\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ZT_NONFREE_CONTROLLER=1;ZT_NONFREE=1;ZT_SSO_ENABLED=1;ZT_NONFREE=1;ZT_EXPORT;FD_SETSIZE=1024;STATICLIB;ZT_SALSA20_SSE;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;WIN32;NOMINMAX;ZT_SOFTWARE_UPDATE_DEFAULT="apply";ZT_BUILD_PLATFORM=2;ZT_BUILD_ARCHITECTURE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StringPooling>true</StringPooling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -575,7 +571,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>wsock32.lib;ws2_32.lib;Iphlpapi.lib;Rpcrt4.lib;zeroidc.lib;bcrypt.lib;userenv.lib;crypt32.lib;secur32.lib;ncrypt.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\zeroidc\target\i686-pc-windows-msvc\release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\rustybits\target\i686-pc-windows-msvc\release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -585,8 +581,8 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="apply";ZT_SALSA20_SSE;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;WIN32;NOMINMAX;ZT_BUILD_PLATFORM=2;ZT_BUILD_ARCHITECTURE=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\rustybits\target;$(SolutionDir)\..\ext\opentelemetry-cpp-api-only\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ZT_NONFREE_CONTROLLER=1;ZT_NONFREE=1;ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="apply";ZT_SALSA20_SSE;ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;WIN32;NOMINMAX;ZT_BUILD_PLATFORM=2;ZT_BUILD_ARCHITECTURE=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <StringPooling>true</StringPooling>
@@ -613,7 +609,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>wbemuuid.lib;wsock32.lib;ws2_32.lib;Iphlpapi.lib;Rpcrt4.lib;zeroidc.lib;bcrypt.lib;userenv.lib;crypt32.lib;secur32.lib;ncrypt.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\zeroidc\target\x86_64-pc-windows-msvc\release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\rustybits\target\x86_64-pc-windows-msvc\release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
@@ -623,8 +619,8 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\zeroidc\target;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="apply";ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;WIN32;NOMINMAX;ZT_BUILD_PLATFORM=2;ZT_BUILD_ARCHITECTURE=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\ext;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\core\include;$(SolutionDir)\..\ext\prometheus-cpp-lite-1.0\simpleapi\include;$(SolutionDir)\..\rustybits\target;$(SolutionDir)\..\ext\opentelemetry-cpp-api-only\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ZT_NONFREE_CONTROLLER=1;ZT_NONFREE=1;ZT_SSO_ENABLED=1;ZT_EXPORT;FD_SETSIZE=1024;STATICLIB;ZT_SOFTWARE_UPDATE_DEFAULT="apply";ZT_USE_MINIUPNPC;MINIUPNP_STATICLIB;WIN32;NOMINMAX;ZT_BUILD_PLATFORM=2;ZT_BUILD_ARCHITECTURE=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <StringPooling>true</StringPooling>
@@ -651,7 +647,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>wbemuuid.lib;wsock32.lib;ws2_32.lib;Iphlpapi.lib;Rpcrt4.lib;zeroidc.lib;bcrypt.lib;userenv.lib;crypt32.lib;secur32.lib;ncrypt.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\zeroidc\target\x86_64-pc-windows-msvc\release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\rustybits\target\aarch64-pc-windows-msvc\release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

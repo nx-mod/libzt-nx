@@ -53,25 +53,12 @@ struct sockaddr_un {
 #include <sys/socket.h>
 #include <sys/param.h>
 #include <sys/time.h>
-#if !defined(__SWITCH__)
 #include <sys/un.h>
-#endif
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <net/if.h>
 #define closesocket close
-#if defined(__SWITCH__)
-/* libnx has no sys/un.h / sockaddr_un; provide one so the (unused) Unix
- * socket discovery path still compiles. */
-#ifndef UNIX_PATH_LEN
-#define UNIX_PATH_LEN   108
-#endif
-struct sockaddr_un {
-  uint16_t sun_family;
-  char     sun_path[UNIX_PATH_LEN];
-};
-#endif
 #endif
 
 #ifdef _WIN32

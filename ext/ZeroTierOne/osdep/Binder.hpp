@@ -1,15 +1,10 @@
-/*
- * Copyright (c)2013-2020 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_BINDER_HPP
 #define ZT_BINDER_HPP
@@ -22,11 +17,11 @@
 #include <string.h>
 
 #ifdef __WINDOWS__
-#include <shlobj.h>
-#include <winsock2.h>
-#include <windows.h>
 #include <iphlpapi.h>
 #include <netioapi.h>
+#include <shlobj.h>
+#include <windows.h>
+#include <winsock2.h>
 #else
 #ifndef __SWITCH__
 #include <ifaddrs.h>
@@ -36,13 +31,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #ifdef __LINUX__
+#include <linux/if_addr.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
-#include <linux/if_addr.h>
 #endif
 #endif
 
-#if (defined(__unix__) || defined(__APPLE__)) && !defined(__LINUX__) && !defined(ZT_SDK)
+#if (defined(__unix__) || defined(__APPLE__)) && ! defined(__LINUX__) && ! defined(ZT_SDK)
 #include <net/if.h>
 #if TARGET_OS_OSX
 #include <netinet6/in6_var.h>
@@ -53,6 +48,7 @@
 #include "../node/InetAddress.hpp"
 #include "../node/Mutex.hpp"
 #include "../node/Utils.hpp"
+#include "../osdep/ExtOsdep.hpp"
 #include "OSUtils.hpp"
 #include "Phy.hpp"
 
@@ -89,11 +85,10 @@ namespace ZeroTier {
 class Binder {
   private:
 	struct _Binding {
-		_Binding() : udpSock((PhySocket*)0), tcpListenSock((PhySocket*)0)
+		_Binding() : udpSock((PhySocket*)0)
 		{
 		}
 		PhySocket* udpSock;
-		PhySocket* tcpListenSock;
 		InetAddress address;
 		char ifname[256] = {};
 	};
@@ -113,7 +108,6 @@ class Binder {
 		Mutex::Lock _l(_lock);
 		for (unsigned int b = 0, c = _bindingCount; b < c; ++b) {
 			phy.close(_bindings[b].udpSock, false);
-			phy.close(_bindings[b].tcpListenSock, false);
 		}
 		_bindingCount = 0;
 	}
@@ -135,7 +129,7 @@ class Binder {
 	template <typename PHY_HANDLER_TYPE, typename INTERFACE_CHECKER> void refresh(Phy<PHY_HANDLER_TYPE>& phy, unsigned int* ports, unsigned int portCount, const std::vector<InetAddress> explicitBind, INTERFACE_CHECKER& ifChecker)
 	{
 		std::map<InetAddress, std::string> localIfAddrs;
-		PhySocket *udps, *tcps;
+		PhySocket* udps;
 		Mutex::Lock _l(_lock);
 		bool interfacesEnumerated = true;
 #ifdef __SWITCH__
@@ -143,6 +137,26 @@ class Binder {
 #endif
 
 		if (explicitBind.empty()) {
+#ifdef ZT_EXTOSDEP
+			std::map<InetAddress, std::string> addrs;
+			interfacesEnumerated = ExtOsdep::getBindAddrs(addrs);
+			for (auto& a : addrs) {
+				auto ip = a.first;
+				switch (ip.ipScope()) {
+					default:
+						break;
+					case InetAddress::IP_SCOPE_PSEUDOPRIVATE:
+					case InetAddress::IP_SCOPE_GLOBAL:
+					case InetAddress::IP_SCOPE_SHARED:
+					case InetAddress::IP_SCOPE_PRIVATE:
+						for (int x = 0; x < (int)portCount; ++x) {
+							ip.setPort(ports[x]);
+							localIfAddrs.insert(std::pair<InetAddress, std::string>(ip, a.second));
+						}
+						break;
+				}
+			}
+#else	// ZT_EXTOSDEP
 #ifdef __WINDOWS__
 
 			char aabuf[32768];
@@ -239,7 +253,7 @@ class Binder {
 						}
 					}
 
-					if ( (flags & IFA_F_TEMPORARY) != 0) {
+					if ((flags & IFA_F_TEMPORARY) != 0) {
 						continue;
 					}
 					if (devname) {
@@ -328,7 +342,7 @@ class Binder {
 			if (! gotViaProc) {
 				struct ifaddrs* ifatbl = (struct ifaddrs*)0;
 				struct ifaddrs* ifa;
-#if (defined(__unix__) || defined(__APPLE__)) && !defined(__LINUX__) && !defined(ZT_SDK)
+#if (defined(__unix__) || defined(__APPLE__)) && ! defined(__LINUX__) && ! defined(ZT_SDK)
 				// set up an IPv6 socket so we can check the state of interfaces via SIOCGIFAFLAG_IN6
 				int infoSock = socket(AF_INET6, SOCK_DGRAM, 0);
 #endif
@@ -337,7 +351,7 @@ class Binder {
 					while (ifa) {
 						if ((ifa->ifa_name) && (ifa->ifa_addr)) {
 							InetAddress ip = *(ifa->ifa_addr);
-#if (defined(__unix__) || defined(__APPLE__)) && !defined(__LINUX__) && !defined(ZT_SDK) && TARGET_OS_OSX
+#if (defined(__unix__) || defined(__APPLE__)) && ! defined(__LINUX__) && ! defined(ZT_SDK) && TARGET_OS_OSX
 							// Check if the address is an IPv6 Temporary Address, macOS/BSD version
 							if (ifa->ifa_addr->sa_family == AF_INET6) {
 								struct sockaddr_in6* sa6 = (struct sockaddr_in6*)ifa->ifa_addr;
@@ -385,13 +399,15 @@ class Binder {
 				else {
 					interfacesEnumerated = false;
 				}
-#if (defined(__unix__) || defined(__APPLE__)) && !defined(__LINUX__) && !defined(ZT_SDK)
+#if (defined(__unix__) || defined(__APPLE__)) && ! defined(__LINUX__) && ! defined(ZT_SDK)
 				close(infoSock);
 #endif
 			}
 #endif
 
 #endif
+
+#endif	 // ZT_EXTOSDEP
 		}
 		else {
 			for (std::vector<InetAddress>::const_iterator i(explicitBind.begin()); i != explicitBind.end(); ++i) {
@@ -423,11 +439,8 @@ class Binder {
 			}
 			else {
 				PhySocket* const udps = _bindings[b].udpSock;
-				PhySocket* const tcps = _bindings[b].tcpListenSock;
 				_bindings[b].udpSock = (PhySocket*)0;
-				_bindings[b].tcpListenSock = (PhySocket*)0;
 				phy.close(udps, false);
-				phy.close(tcps, false);
 			}
 		}
 
@@ -441,32 +454,28 @@ class Binder {
 			}
 			if (bi == _bindingCount) {
 				udps = phy.udpBind(reinterpret_cast<const struct sockaddr*>(&(ii->first)), (void*)0, ZT_UDP_DESIRED_BUF_SIZE);
-				tcps = phy.tcpListen(reinterpret_cast<const struct sockaddr*>(&(ii->first)), (void*)0);
-				if ((udps) && (tcps)) {
+				if (udps) {
 #ifdef __LINUX__
 					// Bind Linux sockets to their device so routes that we manage do not override physical routes (wish all platforms had this!)
 					if (ii->second.length() > 0) {
 						char tmp[256];
 						Utils::scopy(tmp, sizeof(tmp), ii->second.c_str());
 						int fd = (int)Phy<PHY_HANDLER_TYPE>::getDescriptor(udps);
-						if (fd >= 0)
+						if (fd >= 0) {
 							setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, tmp, strlen(tmp));
-						fd = (int)Phy<PHY_HANDLER_TYPE>::getDescriptor(tcps);
-						if (fd >= 0)
-							setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, tmp, strlen(tmp));
+						}
 					}
 #endif	 // __LINUX__
 					if (_bindingCount < ZT_BINDER_MAX_BINDINGS) {
 						_bindings[_bindingCount].udpSock = udps;
-						_bindings[_bindingCount].tcpListenSock = tcps;
 						_bindings[_bindingCount].address = ii->first;
+						memset(_bindings[_bindingCount].ifname, 0x0, sizeof(_bindings[_bindingCount].ifname));
 						memcpy(_bindings[_bindingCount].ifname, (char*)ii->second.c_str(), (int)ii->second.length());
 						++_bindingCount;
 					}
 				}
 				else {
 					phy.close(udps, false);
-					phy.close(tcps, false);
 				}
 			}
 		}

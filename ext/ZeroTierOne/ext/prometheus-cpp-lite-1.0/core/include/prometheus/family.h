@@ -1,5 +1,4 @@
 #pragma once
-#include <stdexcept>
 
 #include <cstddef>
 #include <map>
@@ -9,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 #include <cassert>
+#include <stdexcept>
 
 #include "prometheus/collectable.h"
 #include "prometheus/metric.h"

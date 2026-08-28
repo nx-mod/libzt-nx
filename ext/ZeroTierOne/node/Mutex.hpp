@@ -1,15 +1,10 @@
-/*
- * Copyright (c)2019 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_MUTEX_HPP
 #define ZT_MUTEX_HPP
@@ -18,19 +13,17 @@
 
 #ifdef __UNIX_LIKE__
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 namespace ZeroTier {
 
 // libpthread based mutex lock
-class Mutex
-{
-public:
+class Mutex {
+  public:
 	Mutex()
 	{
-		pthread_mutex_init(&_mh,(const pthread_mutexattr_t *)0);
+		pthread_mutex_init(&_mh, (const pthread_mutexattr_t*)0);
 	}
 
 	~Mutex()
@@ -40,25 +33,22 @@ public:
 
 	inline void lock() const
 	{
-		pthread_mutex_lock(&((const_cast <Mutex *> (this))->_mh));
+		pthread_mutex_lock(&((const_cast<Mutex*>(this))->_mh));
 	}
 
 	inline void unlock() const
 	{
-		pthread_mutex_unlock(&((const_cast <Mutex *> (this))->_mh));
+		pthread_mutex_unlock(&((const_cast<Mutex*>(this))->_mh));
 	}
 
-	class Lock
-	{
-	public:
-		Lock(Mutex &m) :
-			_m(&m)
+	class Lock {
+	  public:
+		Lock(Mutex& m) : _m(&m)
 		{
 			m.lock();
 		}
 
-		Lock(const Mutex &m) :
-			_m(const_cast<Mutex *>(&m))
+		Lock(const Mutex& m) : _m(const_cast<Mutex*>(&m))
 		{
 			_m->lock();
 		}
@@ -68,18 +58,23 @@ public:
 			_m->unlock();
 		}
 
-	private:
-		Mutex *const _m;
+	  private:
+		Mutex* const _m;
 	};
 
-private:
-	Mutex(const Mutex &) {}
-	const Mutex &operator=(const Mutex &) { return *this; }
+  private:
+	Mutex(const Mutex&)
+	{
+	}
+	const Mutex& operator=(const Mutex&)
+	{
+		return *this;
+	}
 
 	pthread_mutex_t _mh;
 };
 
-} // namespace ZeroTier
+}	// namespace ZeroTier
 
 #endif
 
@@ -91,9 +86,8 @@ private:
 namespace ZeroTier {
 
 // Windows critical section based lock
-class Mutex
-{
-public:
+class Mutex {
+  public:
 	Mutex()
 	{
 		InitializeCriticalSection(&_cs);
@@ -116,25 +110,22 @@ public:
 
 	inline void lock() const
 	{
-		(const_cast <Mutex *> (this))->lock();
+		(const_cast<Mutex*>(this))->lock();
 	}
 
 	inline void unlock() const
 	{
-		(const_cast <Mutex *> (this))->unlock();
+		(const_cast<Mutex*>(this))->unlock();
 	}
 
-	class Lock
-	{
-	public:
-		Lock(Mutex &m) :
-			_m(&m)
+	class Lock {
+	  public:
+		Lock(Mutex& m) : _m(&m)
 		{
 			m.lock();
 		}
 
-		Lock(const Mutex &m) :
-			_m(const_cast<Mutex *>(&m))
+		Lock(const Mutex& m) : _m(const_cast<Mutex*>(&m))
 		{
 			_m->lock();
 		}
@@ -144,19 +135,24 @@ public:
 			_m->unlock();
 		}
 
-	private:
-		Mutex *const _m;
+	  private:
+		Mutex* const _m;
 	};
 
-private:
-	Mutex(const Mutex &) {}
-	const Mutex &operator=(const Mutex &) { return *this; }
+  private:
+	Mutex(const Mutex&)
+	{
+	}
+	const Mutex& operator=(const Mutex&)
+	{
+		return *this;
+	}
 
 	CRITICAL_SECTION _cs;
 };
 
-} // namespace ZeroTier
+}	// namespace ZeroTier
 
-#endif // _WIN32
+#endif	 // _WIN32
 
 #endif

@@ -70,20 +70,26 @@
     <Filter Include="Source Files\ext\libnatpmp">
       <UniqueIdentifier>{409ec37e-ff36-4c13-b18d-52d6052e0ca2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\controller">
-      <UniqueIdentifier>{3cad34c8-c436-43ae-8323-57803637c832}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\ext\json">
       <UniqueIdentifier>{ff20532b-d9a2-440d-a7b4-b49e26a9b2f8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\ext\x64-salsa2012-asm">
       <UniqueIdentifier>{05d9cde8-03ae-4e37-b9f7-7417de98cbe9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\controller">
-      <UniqueIdentifier>{7dc22e9c-f869-41e7-b43d-f07f5b94f6fb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\ext\cpp-httplib">
       <UniqueIdentifier>{4dfde4c7-2950-40ee-92f2-05e0916d36c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\nonfree">
+      <UniqueIdentifier>{87126f8c-5daf-46cb-9d94-36a6993fb058}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\nonfree\controller">
+      <UniqueIdentifier>{d05823b2-51ff-4383-ba81-2e7c53a30c0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\nonfree">
+      <UniqueIdentifier>{0f51b1ae-6141-41b8-b7a1-ac700e78b13d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\nonfree\controller">
+      <UniqueIdentifier>{50dfe57d-a749-40c2-ac5a-30614e56c424}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +101,6 @@
     </ClCompile>
     <ClCompile Include="..\..\osdep\OSUtils.cpp">
       <Filter>Source Files\osdep</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\node\C25519.cpp">
-      <Filter>Source Files\node</Filter>
     </ClCompile>
     <ClCompile Include="..\..\node\CertificateOfMembership.cpp">
       <Filter>Source Files\node</Filter>
@@ -234,12 +237,6 @@
     <ClCompile Include="..\..\node\Tag.cpp">
       <Filter>Source Files\node</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\controller\EmbeddedNetworkController.cpp">
-      <Filter>Source Files\controller</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\service\SoftwareUpdater.cpp">
-      <Filter>Source Files\service</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\node\CertificateOfOwnership.cpp">
       <Filter>Source Files\node</Filter>
     </ClCompile>
@@ -251,21 +248,6 @@
     </ClCompile>
     <ClCompile Include="..\..\node\Trace.cpp">
       <Filter>Source Files\node</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\controller\DB.cpp">
-      <Filter>Source Files\controller</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\controller\FileDB.cpp">
-      <Filter>Source Files\controller</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\controller\PostgreSQL.cpp">
-      <Filter>Source Files\controller</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\controller\LFDB.cpp">
-      <Filter>Source Files\controller</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\controller\DBMirrorSet.cpp">
-      <Filter>Source Files\controller</Filter>
     </ClCompile>
     <ClCompile Include="..\..\osdep\EthernetTap.cpp">
       <Filter>Source Files\osdep</Filter>
@@ -293,6 +275,36 @@
     </ClCompile>
     <ClCompile Include="..\..\node\Metrics.cpp">
       <Filter>Source Files\node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\node\PacketMultiplexer.cpp">
+      <Filter>Source Files\node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\node\ECC.cpp">
+      <Filter>Source Files\node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nonfree\controller\CtlUtil.cpp">
+      <Filter>Source Files\nonfree\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nonfree\controller\CV1.cpp">
+      <Filter>Source Files\nonfree\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nonfree\controller\CV2.cpp">
+      <Filter>Source Files\nonfree\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nonfree\controller\DB.cpp">
+      <Filter>Source Files\nonfree\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nonfree\controller\DBMirrorSet.cpp">
+      <Filter>Source Files\nonfree\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nonfree\controller\EmbeddedNetworkController.cpp">
+      <Filter>Source Files\nonfree\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nonfree\controller\FileDB.cpp">
+      <Filter>Source Files\nonfree\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nonfree\controller\PostgreSQL.cpp">
+      <Filter>Source Files\nonfree\controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -332,7 +344,7 @@
     <ClInclude Include="..\..\node\Buffer.hpp">
       <Filter>Header Files\node</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\node\C25519.hpp">
+    <ClInclude Include="..\..\node\ECC.hpp">
       <Filter>Header Files\node</Filter>
     </ClInclude>
     <ClInclude Include="..\..\node\CertificateOfMembership.hpp">
@@ -500,9 +512,6 @@
     <ClInclude Include="..\..\osdep\ManagedRoute.hpp">
       <Filter>Header Files\osdep</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\service\SoftwareUpdater.hpp">
-      <Filter>Header Files\service</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\ext\json\json.hpp">
       <Filter>Header Files\ext\json</Filter>
     </ClInclude>
@@ -515,32 +524,14 @@
     <ClInclude Include="..\..\ext\x64-salsa2012-asm\salsa2012.h">
       <Filter>Header Files\ext\x64-salsa2012-asm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\controller\EmbeddedNetworkController.hpp">
-      <Filter>Header Files\controller</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\node\Trace.hpp">
       <Filter>Header Files\node</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\controller\DB.hpp">
-      <Filter>Header Files\controller</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\controller\FileDB.hpp">
-      <Filter>Header Files\controller</Filter>
     </ClInclude>
     <ClInclude Include="..\..\node\Membership.hpp">
       <Filter>Header Files\node</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\controller\PostgreSQL.hpp">
-      <Filter>Header Files\controller</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\controller\LFDB.hpp">
-      <Filter>Header Files\controller</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\ext\cpp-httplib\httplib.h">
       <Filter>Header Files\ext\cpp-httplib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\controller\DBMirrorSet.hpp">
-      <Filter>Header Files\controller</Filter>
     </ClInclude>
     <ClInclude Include="..\..\osdep\EthernetTap.hpp">
       <Filter>Header Files\osdep</Filter>
@@ -551,9 +542,6 @@
     <ClInclude Include="..\..\node\BondController.hpp">
       <Filter>Header Files\node</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\controller\Redis.hpp">
-      <Filter>Header Files\controller</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\osdep\WinDNSHelper.hpp">
       <Filter>Header Files\osdep</Filter>
     </ClInclude>
@@ -562,6 +550,36 @@
     </ClInclude>
     <ClInclude Include="..\..\node\Metrics.hpp">
       <Filter>Header Files\node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\ConnectionPool.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\CtlUtil.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\CV1.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\CV2.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\DB.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\DBMirrorSet.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\EmbeddedNetworkController.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\FileDB.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\PostgreSQL.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nonfree\controller\Redis.hpp">
+      <Filter>Header Files\nonfree\controller</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

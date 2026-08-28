@@ -1,15 +1,10 @@
-/*
- * Copyright (c)2019 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 /*
  * This defines the external C API for ZeroTier's core network virtualization
@@ -23,22 +18,24 @@
 
 // For the struct sockaddr_storage structure
 #if defined(_WIN32) || defined(_WIN64)
+// clang-format off
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+// clang-format on
 #else /* not Windows */
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #endif /* Windows or not */
 
-#if defined (_MSC_VER)
-#ifdef  ZT_EXPORT
+#if defined(_MSC_VER)
+#ifdef ZT_EXPORT
 #define ZT_SDK_API __declspec(dllexport)
 #else
 #define ZT_SDK_API __declspec(dllimport)
-#if !defined(ZT_SDK)
+#if ! defined(ZT_SDK)
 #ifdef _DEBUG
 #ifdef _WIN64
 #pragma comment(lib, "ZeroTierOne_x64d.lib")
@@ -84,7 +81,7 @@ extern "C" {
 /**
  * Minimum UDP payload size allowed
  */
-#define ZT_MIN_PHYSMTU 1400
+#define ZT_MIN_PHYSMTU 510
 
 /**
  * Maximum physical interface name length. This number is gigantic because of Windows.
@@ -138,7 +135,7 @@ extern "C" {
 /**
  * Maximum number of "specialists" on a network -- bridges, relays, etc.
  */
-#define ZT_MAX_NETWORK_SPECIALISTS 256
+#define ZT_MAX_NETWORK_SPECIALISTS 512
 
 /**
  * Maximum number of multicast group subscriptions per network
@@ -291,74 +288,74 @@ extern "C" {
 #define ZT_RULE_PACKET_CHARACTERISTICS_TCP_FIN 0x0000000000000001ULL
 
 // Fields in remote trace dictionaries
-#define ZT_REMOTE_TRACE_FIELD__EVENT "event"
-#define ZT_REMOTE_TRACE_FIELD__NODE_ID "nodeId"
-#define ZT_REMOTE_TRACE_FIELD__PACKET_ID "packetId"
-#define ZT_REMOTE_TRACE_FIELD__PACKET_VERB "packetVerb"
-#define ZT_REMOTE_TRACE_FIELD__PACKET_TRUSTED_PATH_ID "packetTrustedPathId"
+#define ZT_REMOTE_TRACE_FIELD__EVENT						"event"
+#define ZT_REMOTE_TRACE_FIELD__NODE_ID						"nodeId"
+#define ZT_REMOTE_TRACE_FIELD__PACKET_ID					"packetId"
+#define ZT_REMOTE_TRACE_FIELD__PACKET_VERB					"packetVerb"
+#define ZT_REMOTE_TRACE_FIELD__PACKET_TRUSTED_PATH_ID		"packetTrustedPathId"
 #define ZT_REMOTE_TRACE_FIELD__PACKET_TRUSTED_PATH_APPROVED "packetTrustedPathApproved"
-#define ZT_REMOTE_TRACE_FIELD__PACKET_HOPS "packetHops"
-#define ZT_REMOTE_TRACE_FIELD__REMOTE_ZTADDR "remoteZtAddr"
-#define ZT_REMOTE_TRACE_FIELD__REMOTE_PHYADDR "remotePhyAddr"
-#define ZT_REMOTE_TRACE_FIELD__LOCAL_ZTADDR "localZtAddr"
-#define ZT_REMOTE_TRACE_FIELD__LOCAL_PHYADDR "localPhyAddr"
-#define ZT_REMOTE_TRACE_FIELD__LOCAL_SOCKET "localSocket"
-#define ZT_REMOTE_TRACE_FIELD__IP_SCOPE "phyAddrIpScope"
-#define ZT_REMOTE_TRACE_FIELD__NETWORK_ID "networkId"
-#define ZT_REMOTE_TRACE_FIELD__SOURCE_ZTADDR "sourceZtAddr"
-#define ZT_REMOTE_TRACE_FIELD__DEST_ZTADDR "destZtAddr"
-#define ZT_REMOTE_TRACE_FIELD__SOURCE_MAC "sourceMac"
-#define ZT_REMOTE_TRACE_FIELD__DEST_MAC "destMac"
-#define ZT_REMOTE_TRACE_FIELD__ETHERTYPE "etherType"
-#define ZT_REMOTE_TRACE_FIELD__VLAN_ID "vlanId"
-#define ZT_REMOTE_TRACE_FIELD__FRAME_LENGTH "frameLength"
-#define ZT_REMOTE_TRACE_FIELD__FRAME_DATA "frameData"
-#define ZT_REMOTE_TRACE_FIELD__FILTER_FLAG_NOTEE "filterNoTee"
-#define ZT_REMOTE_TRACE_FIELD__FILTER_FLAG_INBOUND "filterInbound"
-#define ZT_REMOTE_TRACE_FIELD__FILTER_RESULT "filterResult"
-#define ZT_REMOTE_TRACE_FIELD__FILTER_BASE_RULE_LOG "filterBaseRuleLog"
-#define ZT_REMOTE_TRACE_FIELD__FILTER_CAP_RULE_LOG "filterCapRuleLog"
-#define ZT_REMOTE_TRACE_FIELD__FILTER_CAP_ID "filterMatchingCapId"
-#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_TYPE "credType"
-#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_ID "credId"
-#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_TIMESTAMP "credTs"
-#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_INFO "credInfo"
-#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_ISSUED_TO "credIssuedTo"
+#define ZT_REMOTE_TRACE_FIELD__PACKET_HOPS					"packetHops"
+#define ZT_REMOTE_TRACE_FIELD__REMOTE_ZTADDR				"remoteZtAddr"
+#define ZT_REMOTE_TRACE_FIELD__REMOTE_PHYADDR				"remotePhyAddr"
+#define ZT_REMOTE_TRACE_FIELD__LOCAL_ZTADDR					"localZtAddr"
+#define ZT_REMOTE_TRACE_FIELD__LOCAL_PHYADDR				"localPhyAddr"
+#define ZT_REMOTE_TRACE_FIELD__LOCAL_SOCKET					"localSocket"
+#define ZT_REMOTE_TRACE_FIELD__IP_SCOPE						"phyAddrIpScope"
+#define ZT_REMOTE_TRACE_FIELD__NETWORK_ID					"networkId"
+#define ZT_REMOTE_TRACE_FIELD__SOURCE_ZTADDR				"sourceZtAddr"
+#define ZT_REMOTE_TRACE_FIELD__DEST_ZTADDR					"destZtAddr"
+#define ZT_REMOTE_TRACE_FIELD__SOURCE_MAC					"sourceMac"
+#define ZT_REMOTE_TRACE_FIELD__DEST_MAC						"destMac"
+#define ZT_REMOTE_TRACE_FIELD__ETHERTYPE					"etherType"
+#define ZT_REMOTE_TRACE_FIELD__VLAN_ID						"vlanId"
+#define ZT_REMOTE_TRACE_FIELD__FRAME_LENGTH					"frameLength"
+#define ZT_REMOTE_TRACE_FIELD__FRAME_DATA					"frameData"
+#define ZT_REMOTE_TRACE_FIELD__FILTER_FLAG_NOTEE			"filterNoTee"
+#define ZT_REMOTE_TRACE_FIELD__FILTER_FLAG_INBOUND			"filterInbound"
+#define ZT_REMOTE_TRACE_FIELD__FILTER_RESULT				"filterResult"
+#define ZT_REMOTE_TRACE_FIELD__FILTER_BASE_RULE_LOG			"filterBaseRuleLog"
+#define ZT_REMOTE_TRACE_FIELD__FILTER_CAP_RULE_LOG			"filterCapRuleLog"
+#define ZT_REMOTE_TRACE_FIELD__FILTER_CAP_ID				"filterMatchingCapId"
+#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_TYPE				"credType"
+#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_ID				"credId"
+#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_TIMESTAMP			"credTs"
+#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_INFO				"credInfo"
+#define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_ISSUED_TO			"credIssuedTo"
 #define ZT_REMOTE_TRACE_FIELD__CREDENTIAL_REVOCATION_TARGET "credRevocationTarget"
-#define ZT_REMOTE_TRACE_FIELD__REASON "reason"
-#define ZT_REMOTE_TRACE_FIELD__NETWORK_CONTROLLER_ID "networkControllerId"
+#define ZT_REMOTE_TRACE_FIELD__REASON						"reason"
+#define ZT_REMOTE_TRACE_FIELD__NETWORK_CONTROLLER_ID		"networkControllerId"
 
 // Event types in remote traces
-#define ZT_REMOTE_TRACE_EVENT__RESETTING_PATHS_IN_SCOPE 0x1000
-#define ZT_REMOTE_TRACE_EVENT__PEER_CONFIRMING_UNKNOWN_PATH 0x1001
-#define ZT_REMOTE_TRACE_EVENT__PEER_LEARNED_NEW_PATH 0x1002
-#define ZT_REMOTE_TRACE_EVENT__PEER_REDIRECTED 0x1003
-#define ZT_REMOTE_TRACE_EVENT__PACKET_MAC_FAILURE 0x1004
-#define ZT_REMOTE_TRACE_EVENT__PACKET_INVALID 0x1005
-#define ZT_REMOTE_TRACE_EVENT__DROPPED_HELLO 0x1006
+#define ZT_REMOTE_TRACE_EVENT__RESETTING_PATHS_IN_SCOPE		  0x1000
+#define ZT_REMOTE_TRACE_EVENT__PEER_CONFIRMING_UNKNOWN_PATH	  0x1001
+#define ZT_REMOTE_TRACE_EVENT__PEER_LEARNED_NEW_PATH		  0x1002
+#define ZT_REMOTE_TRACE_EVENT__PEER_REDIRECTED				  0x1003
+#define ZT_REMOTE_TRACE_EVENT__PACKET_MAC_FAILURE			  0x1004
+#define ZT_REMOTE_TRACE_EVENT__PACKET_INVALID				  0x1005
+#define ZT_REMOTE_TRACE_EVENT__DROPPED_HELLO				  0x1006
 #define ZT_REMOTE_TRACE_EVENT__OUTGOING_NETWORK_FRAME_DROPPED 0x2000
 #define ZT_REMOTE_TRACE_EVENT__INCOMING_NETWORK_ACCESS_DENIED 0x2001
 #define ZT_REMOTE_TRACE_EVENT__INCOMING_NETWORK_FRAME_DROPPED 0x2002
-#define ZT_REMOTE_TRACE_EVENT__CREDENTIAL_REJECTED 0x2003
-#define ZT_REMOTE_TRACE_EVENT__CREDENTIAL_ACCEPTED 0x2004
-#define ZT_REMOTE_TRACE_EVENT__NETWORK_CONFIG_REQUEST_SENT 0x2005
-#define ZT_REMOTE_TRACE_EVENT__NETWORK_FILTER_TRACE 0x2006
+#define ZT_REMOTE_TRACE_EVENT__CREDENTIAL_REJECTED			  0x2003
+#define ZT_REMOTE_TRACE_EVENT__CREDENTIAL_ACCEPTED			  0x2004
+#define ZT_REMOTE_TRACE_EVENT__NETWORK_CONFIG_REQUEST_SENT	  0x2005
+#define ZT_REMOTE_TRACE_EVENT__NETWORK_FILTER_TRACE			  0x2006
 
 // Event types in remote traces in hex string form
-#define ZT_REMOTE_TRACE_EVENT__RESETTING_PATHS_IN_SCOPE_S "1000"
-#define ZT_REMOTE_TRACE_EVENT__PEER_CONFIRMING_UNKNOWN_PATH_S "1001"
-#define ZT_REMOTE_TRACE_EVENT__PEER_LEARNED_NEW_PATH_S "1002"
-#define ZT_REMOTE_TRACE_EVENT__PEER_REDIRECTED_S "1003"
-#define ZT_REMOTE_TRACE_EVENT__PACKET_MAC_FAILURE_S "1004"
-#define ZT_REMOTE_TRACE_EVENT__PACKET_INVALID_S "1005"
-#define ZT_REMOTE_TRACE_EVENT__DROPPED_HELLO_S "1006"
+#define ZT_REMOTE_TRACE_EVENT__RESETTING_PATHS_IN_SCOPE_S		"1000"
+#define ZT_REMOTE_TRACE_EVENT__PEER_CONFIRMING_UNKNOWN_PATH_S	"1001"
+#define ZT_REMOTE_TRACE_EVENT__PEER_LEARNED_NEW_PATH_S			"1002"
+#define ZT_REMOTE_TRACE_EVENT__PEER_REDIRECTED_S				"1003"
+#define ZT_REMOTE_TRACE_EVENT__PACKET_MAC_FAILURE_S				"1004"
+#define ZT_REMOTE_TRACE_EVENT__PACKET_INVALID_S					"1005"
+#define ZT_REMOTE_TRACE_EVENT__DROPPED_HELLO_S					"1006"
 #define ZT_REMOTE_TRACE_EVENT__OUTGOING_NETWORK_FRAME_DROPPED_S "2000"
 #define ZT_REMOTE_TRACE_EVENT__INCOMING_NETWORK_ACCESS_DENIED_S "2001"
 #define ZT_REMOTE_TRACE_EVENT__INCOMING_NETWORK_FRAME_DROPPED_S "2002"
-#define ZT_REMOTE_TRACE_EVENT__CREDENTIAL_REJECTED_S "2003"
-#define ZT_REMOTE_TRACE_EVENT__CREDENTIAL_ACCEPTED_S "2004"
-#define ZT_REMOTE_TRACE_EVENT__NETWORK_CONFIG_REQUEST_SENT_S "2005"
-#define ZT_REMOTE_TRACE_EVENT__NETWORK_FILTER_TRACE_S "2006"
+#define ZT_REMOTE_TRACE_EVENT__CREDENTIAL_REJECTED_S			"2003"
+#define ZT_REMOTE_TRACE_EVENT__CREDENTIAL_ACCEPTED_S			"2004"
+#define ZT_REMOTE_TRACE_EVENT__NETWORK_CONFIG_REQUEST_SENT_S	"2005"
+#define ZT_REMOTE_TRACE_EVENT__NETWORK_FILTER_TRACE_S			"2006"
 
 /****************************************************************************/
 /* Structures and other types                                               */
@@ -372,8 +369,7 @@ extern "C" {
  * indicate serious problems like an inaccessible data store or a compile
  * problem.
  */
-enum ZT_ResultCode
-{
+enum ZT_ResultCode {
 	/**
 	 * Operation completed normally
 	 */
@@ -423,13 +419,12 @@ enum ZT_ResultCode
  * @param x Result code
  * @return True if result code indicates a fatal error
  */
-#define ZT_ResultCode_isFatal(x) ((((int)(x)) >= 100)&&(((int)(x)) < 1000))
+#define ZT_ResultCode_isFatal(x) ((((int)(x)) >= 100) && (((int)(x)) < 1000))
 
 /**
  * Status codes sent to status update callback when things happen
  */
-enum ZT_Event
-{
+enum ZT_Event {
 	/**
 	 * Node has been initialized
 	 *
@@ -534,8 +529,7 @@ enum ZT_Event
 /**
  * Payload of REMOTE_TRACE event
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * ZeroTier address of sender
 	 */
@@ -552,7 +546,7 @@ typedef struct
 	 *
 	 * The contents of data[] may be modified.
 	 */
-	char *data;
+	char* data;
 
 	/**
 	 * Length of dict[] in bytes, including terminating null
@@ -570,8 +564,7 @@ typedef struct
  * in the world can send you a user message! (Unless your network is air
  * gapped.)
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * ZeroTier address of sender (least significant 40 bits)
 	 */
@@ -585,7 +578,7 @@ typedef struct
 	/**
 	 * User message data (not including type ID)
 	 */
-	const void *data;
+	const void* data;
 
 	/**
 	 * Length of data in bytes
@@ -596,8 +589,7 @@ typedef struct
 /**
  * Current node status
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * 40-bit ZeroTier address of this node
 	 */
@@ -608,14 +600,14 @@ typedef struct
 	 *
 	 * This pointer will remain valid as long as the node exists.
 	 */
-	const char *publicIdentity;
+	const char* publicIdentity;
 
 	/**
 	 * Full identity including secret key in string-serialized form
 	 *
 	 * This pointer will remain valid as long as the node exists.
 	 */
-	const char *secretIdentity;
+	const char* secretIdentity;
 
 	/**
 	 * True if some kind of connectivity appears available
@@ -628,8 +620,7 @@ typedef struct
  *
  * This structure is subject to change between versions.
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * Number of each protocol verb (possible verbs 0..31) received
 	 */
@@ -644,8 +635,7 @@ typedef struct
 /**
  * Virtual network status codes
  */
-enum ZT_VirtualNetworkStatus
-{
+enum ZT_VirtualNetworkStatus {
 	/**
 	 * Waiting for network configuration (also means revision == 0)
 	 */
@@ -685,8 +675,7 @@ enum ZT_VirtualNetworkStatus
 /**
  * Virtual network type codes
  */
-enum ZT_VirtualNetworkType
-{
+enum ZT_VirtualNetworkType {
 	/**
 	 * Private networks are authorized via certificates of membership
 	 */
@@ -707,8 +696,7 @@ enum ZT_VirtualNetworkType
  * Each rule is composed of zero or more MATCHes followed by an ACTION.
  * An ACTION with no MATCHes is always taken.
  */
-enum ZT_VirtualNetworkRuleType
-{
+enum ZT_VirtualNetworkRuleType {
 	// 0 to 15 reserved for actions
 
 	/**
@@ -799,8 +787,7 @@ enum ZT_VirtualNetworkRuleType
  * This is designed to be a more memory-efficient way of storing rules than
  * a wide table, yet still fast and simple to access in code.
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * Type and flags
 	 *
@@ -842,10 +829,10 @@ typedef struct
 		 * bytes and doesn't enlarge the overall size of this union.
 		 */
 		struct {
-			uint64_t start; // integer range start
-			uint32_t end; // end of integer range (relative to start, inclusive, 0 for equality w/start)
-			uint16_t idx; // index in packet of integer
-			uint8_t format; // bits in integer (range 1-64, ((format&63)+1)) and endianness (MSB 1 for little, 0 for big)
+			uint64_t start;	  // integer range start
+			uint32_t end;	  // end of integer range (relative to start, inclusive, 0 for equality w/start)
+			uint16_t idx;	  // index in packet of integer
+			uint8_t format;	  // bits in integer (range 1-64, ((format&63)+1)) and endianness (MSB 1 for little, 0 for big)
 		} intRange;
 
 		/**
@@ -915,9 +902,9 @@ typedef struct
 		 * ICMP type and code
 		 */
 		struct {
-			uint8_t type; // ICMP type, always matched
-			uint8_t code; // ICMP code if matched
-			uint8_t flags; // flag 0x01 means also match code, otherwise only match type
+			uint8_t type;	 // ICMP type, always matched
+			uint8_t code;	 // ICMP code if matched
+			uint8_t flags;	 // flag 0x01 means also match code, otherwise only match type
 		} icmp;
 
 		/**
@@ -947,8 +934,7 @@ typedef struct
 /**
  * A route to be pushed on a virtual network
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * Target network / netmask bits (in port field) or NULL or 0.0.0.0/0 for default
 	 */
@@ -973,8 +959,7 @@ typedef struct
 /**
  * DNS configuration to be pushed on a virtual network
  */
-typedef struct
-{
+typedef struct {
 	char domain[128];
 	struct sockaddr_storage server_addr[ZT_MAX_DNS_SERVERS];
 } ZT_VirtualNetworkDNS;
@@ -982,8 +967,7 @@ typedef struct
 /**
  * An Ethernet multicast group
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * MAC address (least significant 48 bits)
 	 */
@@ -998,8 +982,7 @@ typedef struct
 /**
  * Virtual network configuration update type
  */
-enum ZT_VirtualNetworkConfigOperation
-{
+enum ZT_VirtualNetworkConfigOperation {
 	/**
 	 * Network is coming up (either for the first time or after service restart)
 	 */
@@ -1024,27 +1007,21 @@ enum ZT_VirtualNetworkConfigOperation
 /**
  * What trust hierarchy role does this peer have?
  */
-enum ZT_PeerRole
-{
-	ZT_PEER_ROLE_LEAF = 0,       // ordinary node
-	ZT_PEER_ROLE_MOON = 1,       // moon root
-	ZT_PEER_ROLE_PLANET = 2      // planetary root
+enum ZT_PeerRole {
+	ZT_PEER_ROLE_LEAF = 0,	  // ordinary node
+	ZT_PEER_ROLE_MOON = 1,	  // moon root
+	ZT_PEER_ROLE_PLANET = 2	  // planetary root
 };
 
 /**
  * Vendor ID
  */
-enum ZT_Vendor
-{
-	ZT_VENDOR_UNSPECIFIED = 0,
-	ZT_VENDOR_ZEROTIER = 1
-};
+enum ZT_Vendor { ZT_VENDOR_UNSPECIFIED = 0, ZT_VENDOR_ZEROTIER = 1 };
 
 /**
  * Platform type
  */
-enum ZT_Platform
-{
+enum ZT_Platform {
 	ZT_PLATFORM_UNSPECIFIED = 0,
 	ZT_PLATFORM_LINUX = 1,
 	ZT_PLATFORM_WINDOWS = 2,
@@ -1066,8 +1043,7 @@ enum ZT_Platform
 /**
  * Architecture type
  */
-enum ZT_Architecture
-{
+enum ZT_Architecture {
 	ZT_ARCHITECTURE_UNSPECIFIED = 0,
 	ZT_ARCHITECTURE_X86 = 1,
 	ZT_ARCHITECTURE_X64 = 2,
@@ -1091,8 +1067,7 @@ enum ZT_Architecture
 /**
  * Virtual network configuration
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * 64-bit ZeroTier network ID
 	 */
@@ -1200,8 +1175,6 @@ typedef struct
 	 */
 	ZT_VirtualNetworkDNS dns;
 
-
-
 	/**
 	 * sso enabled
 	 */
@@ -1256,9 +1229,8 @@ typedef struct
 /**
  * A list of networks
  */
-typedef struct
-{
-	ZT_VirtualNetworkConfig *networks;
+typedef struct {
+	ZT_VirtualNetworkConfig* networks;
 	unsigned long networkCount;
 } ZT_VirtualNetworkList;
 
@@ -1280,8 +1252,7 @@ typedef struct {
 /**
  * Physical network path to a peer
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * Address of endpoint
 	 */
@@ -1347,7 +1318,15 @@ typedef struct
 	 */
 	char ifname[ZT_MAX_PHYSIFNAME];
 
+	/**
+	 * Pointer to PhySocket object for this path
+	 */
 	uint64_t localSocket;
+
+	/**
+	 * Local port corresponding to this path's localSocket
+	 */
+	uint16_t localPort;
 
 	/**
 	 * Is path expired?
@@ -1378,8 +1357,7 @@ typedef struct
 /**
  * Peer status result buffer
  */
-typedef struct
-{
+typedef struct {
 	/**
 	 * ZeroTier address (40 bits)
 	 */
@@ -1449,17 +1427,15 @@ typedef struct
 /**
  * List of peers
  */
-typedef struct
-{
-	ZT_Peer *peers;
+typedef struct {
+	ZT_Peer* peers;
 	unsigned long peerCount;
 } ZT_PeerList;
 
 /**
  * ZeroTier core state objects
  */
-enum ZT_StateObjectType
-{
+enum ZT_StateObjectType {
 	/**
 	 * Null object -- ignored
 	 */
@@ -1470,7 +1446,7 @@ enum ZT_StateObjectType
 	 *
 	 * Object ID: this node's address if known, or 0 if unknown (first query)
 	 * Canonical path: <HOME>/identity.public
-   * Persistence: required
+	 * Persistence: required
 	 */
 	ZT_STATE_OBJECT_IDENTITY_PUBLIC = 1,
 
@@ -1479,7 +1455,7 @@ enum ZT_StateObjectType
 	 *
 	 * Object ID: this node's address if known, or 0 if unknown (first query)
 	 * Canonical path: <HOME>/identity.secret
-   * Persistence: required, should be stored with restricted permissions e.g. mode 0600 on *nix
+	 * Persistence: required, should be stored with restricted permissions e.g. mode 0600 on *nix
 	 */
 	ZT_STATE_OBJECT_IDENTITY_SECRET = 2,
 
@@ -1551,13 +1527,13 @@ typedef void ZT_Node;
  * PORT_ERROR state.
  */
 typedef int (*ZT_VirtualNetworkConfigFunction)(
-	ZT_Node *,                             /* Node */
-	void *,                                /* User ptr */
-	void *,                                /* Thread ptr */
-	uint64_t,                              /* Network ID */
-	void **,                               /* Modifiable network user PTR */
+	ZT_Node*,							   /* Node */
+	void*,								   /* User ptr */
+	void*,								   /* Thread ptr */
+	uint64_t,							   /* Network ID */
+	void**,								   /* Modifiable network user PTR */
 	enum ZT_VirtualNetworkConfigOperation, /* Config operation */
-	const ZT_VirtualNetworkConfig *);      /* Network configuration */
+	const ZT_VirtualNetworkConfig*);	   /* Network configuration */
 
 /**
  * Function to send a frame out to a virtual network port
@@ -1567,17 +1543,17 @@ typedef int (*ZT_VirtualNetworkConfigFunction)(
  * (9) frame length.
  */
 typedef void (*ZT_VirtualNetworkFrameFunction)(
-	ZT_Node *,                             /* Node */
-	void *,                                /* User ptr */
-	void *,                                /* Thread ptr */
-	uint64_t,                              /* Network ID */
-	void **,                               /* Modifiable network user PTR */
-	uint64_t,                              /* Source MAC */
-	uint64_t,                              /* Destination MAC */
-	unsigned int,                          /* Ethernet type */
-	unsigned int,                          /* VLAN ID (0 for none) */
-	const void *,                          /* Frame data */
-	unsigned int);                         /* Frame length */
+	ZT_Node*,	   /* Node */
+	void*,		   /* User ptr */
+	void*,		   /* Thread ptr */
+	uint64_t,	   /* Network ID */
+	void**,		   /* Modifiable network user PTR */
+	uint64_t,	   /* Source MAC */
+	uint64_t,	   /* Destination MAC */
+	unsigned int,  /* Ethernet type */
+	unsigned int,  /* VLAN ID (0 for none) */
+	const void*,   /* Frame data */
+	unsigned int); /* Frame length */
 
 /**
  * Callback for events
@@ -1589,11 +1565,11 @@ typedef void (*ZT_VirtualNetworkFrameFunction)(
  * in the definition of ZT_Event.
  */
 typedef void (*ZT_EventCallback)(
-	ZT_Node *,                             /* Node */
-	void *,                                /* User ptr */
-	void *,                                /* Thread ptr */
-	enum ZT_Event,                         /* Event type */
-	const void *);                         /* Event payload (if applicable) */
+	ZT_Node*,	   /* Node */
+	void*,		   /* User ptr */
+	void*,		   /* Thread ptr */
+	enum ZT_Event, /* Event type */
+	const void*);  /* Event payload (if applicable) */
 
 /**
  * Callback for storing and/or publishing state information
@@ -1605,13 +1581,13 @@ typedef void (*ZT_EventCallback)(
  * deleted.
  */
 typedef void (*ZT_StatePutFunction)(
-	ZT_Node *,                             /* Node */
-	void *,                                /* User ptr */
-	void *,                                /* Thread ptr */
-	enum ZT_StateObjectType,               /* State object type */
-	const uint64_t [2],                    /* State object ID (if applicable) */
-	const void *,                          /* State object data */
-	int);                                  /* Length of data or -1 to delete */
+	ZT_Node*,				 /* Node */
+	void*,					 /* User ptr */
+	void*,					 /* Thread ptr */
+	enum ZT_StateObjectType, /* State object type */
+	const uint64_t[2],		 /* State object ID (if applicable) */
+	const void*,			 /* State object data */
+	int);					 /* Length of data or -1 to delete */
 
 /**
  * Callback for retrieving stored state information
@@ -1621,13 +1597,13 @@ typedef void (*ZT_StatePutFunction)(
  * small to store it.
  */
 typedef int (*ZT_StateGetFunction)(
-	ZT_Node *,                             /* Node */
-	void *,                                /* User ptr */
-	void *,                                /* Thread ptr */
-	enum ZT_StateObjectType,               /* State object type */
-	const uint64_t [2],                    /* State object ID (if applicable) */
-	void *,                                /* Buffer to store state object data */
-	unsigned int);                         /* Length of data buffer in bytes */
+	ZT_Node*,				 /* Node */
+	void*,					 /* User ptr */
+	void*,					 /* Thread ptr */
+	enum ZT_StateObjectType, /* State object type */
+	const uint64_t[2],		 /* State object ID (if applicable) */
+	void*,					 /* Buffer to store state object data */
+	unsigned int);			 /* Length of data buffer in bytes */
 
 /**
  * Function to send a ZeroTier packet out over the physical wire (L2/L3)
@@ -1654,14 +1630,14 @@ typedef int (*ZT_StateGetFunction)(
  * delivery. It only means that the packet appears to have been sent.
  */
 typedef int (*ZT_WirePacketSendFunction)(
-	ZT_Node *,                        /* Node */
-	void *,                           /* User ptr */
-	void *,                           /* Thread ptr */
-	int64_t,                          /* Local socket */
-	const struct sockaddr_storage *,  /* Remote address */
-	const void *,                     /* Packet data */
-	unsigned int,                     /* Packet length */
-	unsigned int);                    /* TTL or 0 to use default */
+	ZT_Node*,						/* Node */
+	void*,							/* User ptr */
+	void*,							/* Thread ptr */
+	int64_t,						/* Local socket */
+	const struct sockaddr_storage*, /* Remote address */
+	const void*,					/* Packet data */
+	unsigned int,					/* Packet length */
+	unsigned int);					/* TTL or 0 to use default */
 
 /**
  * Function to check whether a path should be used for ZeroTier traffic
@@ -1685,12 +1661,12 @@ typedef int (*ZT_WirePacketSendFunction)(
  * interface (recursion).
  */
 typedef int (*ZT_PathCheckFunction)(
-	ZT_Node *,                        /* Node */
-	void *,                           /* User ptr */
-	void *,                           /* Thread ptr */
-	uint64_t,                         /* ZeroTier address */
-	int64_t,                          /* Local socket or -1 if unknown */
-	const struct sockaddr_storage *); /* Remote address */
+	ZT_Node*,						 /* Node */
+	void*,							 /* User ptr */
+	void*,							 /* Thread ptr */
+	uint64_t,						 /* ZeroTier address */
+	int64_t,						 /* Local socket or -1 if unknown */
+	const struct sockaddr_storage*); /* Remote address */
 
 /**
  * Function to get physical addresses for ZeroTier peers
@@ -1708,12 +1684,12 @@ typedef int (*ZT_PathCheckFunction)(
  * with an address.
  */
 typedef int (*ZT_PathLookupFunction)(
-	ZT_Node *,                        /* Node */
-	void *,                           /* User ptr */
-	void *,                           /* Thread ptr */
-	uint64_t,                         /* ZeroTier address (40 bits) */
-	int,                              /* Desired ss_family or -1 for any */
-	struct sockaddr_storage *);       /* Result buffer */
+	ZT_Node*,				   /* Node */
+	void*,					   /* User ptr */
+	void*,					   /* Thread ptr */
+	uint64_t,				   /* ZeroTier address (40 bits) */
+	int,					   /* Desired ss_family or -1 for any */
+	struct sockaddr_storage*); /* Result buffer */
 
 /****************************************************************************/
 /* C Node API                                                               */
@@ -1722,8 +1698,7 @@ typedef int (*ZT_PathLookupFunction)(
 /**
  * Structure for configuring ZeroTier core callback functions
  */
-struct ZT_Node_Callbacks
-{
+struct ZT_Node_Callbacks {
 	/**
 	 * Struct version -- must currently be 0
 	 */
@@ -1771,6 +1746,33 @@ struct ZT_Node_Callbacks
 };
 
 /**
+ * Node configuration options
+ */
+struct ZT_Node_Config {
+	/**
+	 * If non-zero enable encrypted HELLO packets.
+	 *
+	 * This attaches an ephemeral key to HELLO packets and encrypts them. It
+	 * increases CPU usage slightly, which can matter at scale for nodes that
+	 * handle huge numbers of clients like controllers. HELLO packets only
+	 * contain keys and a small amount of meta-data like node version, never
+	 * user data or information about things like network membership, so the
+	 * security impact of this is negligable. ZT1 does not and never has
+	 * guaranteed meta-data privacy, only data privacy. Enable only if you
+	 * need it for compliance reasons.
+	 */
+	int enableEncryptedHello;
+
+	/**
+	 * If non-zero enable low bandwidth mode.
+	 *
+	 * This reduces keepalive and path sensing traffic, which can slow fail-
+	 * over but reduces idle bandwidth. Enable in low bandwidth environments.
+	 */
+	int lowBandwidthMode;
+};
+
+/**
  * Create a new ZeroTier node
  *
  * This will attempt to load its identity via the state get function in the
@@ -1779,13 +1781,14 @@ struct ZT_Node_Callbacks
  * to a few seconds depending on your CPU speed.
  *
  * @param node Result: pointer is set to new node instance on success
+ * @param config Node-wide configuration options set on startup
  * @param uptr User pointer to pass to functions/callbacks
  * @param tptr Thread pointer to pass to functions/callbacks resulting from this call
  * @param callbacks Callback function configuration
  * @param now Current clock in milliseconds
  * @return OK (0) or error code if a fatal error condition has occurred
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_new(ZT_Node **node,void *uptr,void *tptr,const struct ZT_Node_Callbacks *callbacks,int64_t now);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_new(ZT_Node** node, const struct ZT_Node_Config* config, void* uptr, void* tptr, const struct ZT_Node_Callbacks* callbacks, int64_t now);
 
 /**
  * Delete a node and free all resources it consumes
@@ -1795,7 +1798,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_new(ZT_Node **node,void *uptr,void *tptr,c
  *
  * @param node Node to delete
  */
-ZT_SDK_API void ZT_Node_delete(ZT_Node *node);
+ZT_SDK_API void ZT_Node_delete(ZT_Node* node);
 
 /**
  * Process a packet received from the physical wire
@@ -1810,15 +1813,8 @@ ZT_SDK_API void ZT_Node_delete(ZT_Node *node);
  * @param nextBackgroundTaskDeadline Value/result: set to deadline for next call to processBackgroundTasks()
  * @return OK (0) or error code if a fatal error condition has occurred
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_processWirePacket(
-	ZT_Node *node,
-	void *tptr,
-	int64_t now,
-	int64_t localSocket,
-	const struct sockaddr_storage *remoteAddress,
-	const void *packetData,
-	unsigned int packetLength,
-	volatile int64_t *nextBackgroundTaskDeadline);
+ZT_SDK_API enum ZT_ResultCode
+ZT_Node_processWirePacket(ZT_Node* node, void* tptr, int64_t now, int64_t localSocket, const struct sockaddr_storage* remoteAddress, const void* packetData, unsigned int packetLength, volatile int64_t* nextBackgroundTaskDeadline);
 
 /**
  * Process a frame from a virtual network port (tap)
@@ -1837,17 +1833,17 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_processWirePacket(
  * @return OK (0) or error code if a fatal error condition has occurred
  */
 ZT_SDK_API enum ZT_ResultCode ZT_Node_processVirtualNetworkFrame(
-	ZT_Node *node,
-	void *tptr,
+	ZT_Node* node,
+	void* tptr,
 	int64_t now,
 	uint64_t nwid,
 	uint64_t sourceMac,
 	uint64_t destMac,
 	unsigned int etherType,
 	unsigned int vlanId,
-	const void *frameData,
+	const void* frameData,
 	unsigned int frameLength,
-	volatile int64_t *nextBackgroundTaskDeadline);
+	volatile int64_t* nextBackgroundTaskDeadline);
 
 /**
  * Perform periodic background operations
@@ -1858,7 +1854,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_processVirtualNetworkFrame(
  * @param nextBackgroundTaskDeadline Value/result: set to deadline for next call to processBackgroundTasks()
  * @return OK (0) or error code if a fatal error condition has occurred
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_processBackgroundTasks(ZT_Node *node,void *tptr,int64_t now,volatile int64_t *nextBackgroundTaskDeadline);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_processBackgroundTasks(ZT_Node* node, void* tptr, int64_t now, volatile int64_t* nextBackgroundTaskDeadline);
 
 /**
  * Join a network
@@ -1874,7 +1870,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_processBackgroundTasks(ZT_Node *node,void 
  * @param uptr An arbitrary pointer to associate with this network (default: NULL)
  * @return OK (0) or error code if a fatal error condition has occurred
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_join(ZT_Node *node,uint64_t nwid,void *uptr,void *tptr);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_join(ZT_Node* node, uint64_t nwid, void* uptr, void* tptr);
 
 /**
  * Leave a network
@@ -1891,7 +1887,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_join(ZT_Node *node,uint64_t nwid,void *upt
  * @param uptr Target pointer is set to uptr (if not NULL)
  * @return OK (0) or error code if a fatal error condition has occurred
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_leave(ZT_Node *node,uint64_t nwid,void **uptr,void *tptr);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_leave(ZT_Node* node, uint64_t nwid, void** uptr, void* tptr);
 
 /**
  * Subscribe to an Ethernet multicast group
@@ -1919,7 +1915,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_leave(ZT_Node *node,uint64_t nwid,void **u
  * @param multicastAdi Multicast ADI (least significant 32 bits only, use 0 if not needed)
  * @return OK (0) or error code if a fatal error condition has occurred
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_multicastSubscribe(ZT_Node *node,void *tptr,uint64_t nwid,uint64_t multicastGroup,unsigned long multicastAdi);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_multicastSubscribe(ZT_Node* node, void* tptr, uint64_t nwid, uint64_t multicastGroup, unsigned long multicastAdi);
 
 /**
  * Unsubscribe from an Ethernet multicast group (or all groups)
@@ -1935,7 +1931,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_multicastSubscribe(ZT_Node *node,void *tpt
  * @param multicastAdi Multicast ADI (least significant 32 bits only, use 0 if not needed)
  * @return OK (0) or error code if a fatal error condition has occurred
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_multicastUnsubscribe(ZT_Node *node,uint64_t nwid,uint64_t multicastGroup,unsigned long multicastAdi);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_multicastUnsubscribe(ZT_Node* node, uint64_t nwid, uint64_t multicastGroup, unsigned long multicastAdi);
 
 /**
  * Add or update a moon
@@ -1951,7 +1947,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_multicastUnsubscribe(ZT_Node *node,uint64_
  * @param len Length of moonWorld in bytes
  * @return Error if moon was invalid or failed to be added
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_orbit(ZT_Node *node,void *tptr,uint64_t moonWorldId,uint64_t moonSeed);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_orbit(ZT_Node* node, void* tptr, uint64_t moonWorldId, uint64_t moonSeed);
 
 /**
  * Remove a moon (does nothing if not present)
@@ -1961,7 +1957,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_orbit(ZT_Node *node,void *tptr,uint64_t mo
  * @param moonWorldId World ID of moon to remove
  * @return Error if anything bad happened
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_deorbit(ZT_Node *node,void *tptr,uint64_t moonWorldId);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_deorbit(ZT_Node* node, void* tptr, uint64_t moonWorldId);
 
 /**
  * Get this node's 40-bit ZeroTier address
@@ -1969,7 +1965,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_deorbit(ZT_Node *node,void *tptr,uint64_t 
  * @param node Node instance
  * @return ZeroTier address (least significant 40 bits of 64-bit int)
  */
-ZT_SDK_API uint64_t ZT_Node_address(ZT_Node *node);
+ZT_SDK_API uint64_t ZT_Node_address(ZT_Node* node);
 
 /**
  * Get the status of this node
@@ -1977,7 +1973,7 @@ ZT_SDK_API uint64_t ZT_Node_address(ZT_Node *node);
  * @param node Node instance
  * @param status Buffer to fill with current node status
  */
-ZT_SDK_API void ZT_Node_status(ZT_Node *node,ZT_NodeStatus *status);
+ZT_SDK_API void ZT_Node_status(ZT_Node* node, ZT_NodeStatus* status);
 
 /**
  * Get a list of known peer nodes
@@ -1988,7 +1984,7 @@ ZT_SDK_API void ZT_Node_status(ZT_Node *node,ZT_NodeStatus *status);
  * @param node Node instance
  * @return List of known peers or NULL on failure
  */
-ZT_SDK_API ZT_PeerList *ZT_Node_peers(ZT_Node *node);
+ZT_SDK_API ZT_PeerList* ZT_Node_peers(ZT_Node* node);
 
 /**
  * Get the status of a virtual network
@@ -2000,7 +1996,7 @@ ZT_SDK_API ZT_PeerList *ZT_Node_peers(ZT_Node *node);
  * @param nwid 64-bit network ID
  * @return Network configuration or NULL if we are not a member of this network
  */
-ZT_SDK_API ZT_VirtualNetworkConfig *ZT_Node_networkConfig(ZT_Node *node,uint64_t nwid);
+ZT_SDK_API ZT_VirtualNetworkConfig* ZT_Node_networkConfig(ZT_Node* node, uint64_t nwid);
 
 /**
  * Enumerate and get status of all networks
@@ -2008,7 +2004,7 @@ ZT_SDK_API ZT_VirtualNetworkConfig *ZT_Node_networkConfig(ZT_Node *node,uint64_t
  * @param node Node instance
  * @return List of networks or NULL on failure
  */
-ZT_SDK_API ZT_VirtualNetworkList *ZT_Node_networks(ZT_Node *node);
+ZT_SDK_API ZT_VirtualNetworkList* ZT_Node_networks(ZT_Node* node);
 
 /**
  * Free a query result buffer
@@ -2018,7 +2014,7 @@ ZT_SDK_API ZT_VirtualNetworkList *ZT_Node_networks(ZT_Node *node);
  * @param node Node instance
  * @param qr Query result buffer
  */
-ZT_SDK_API void ZT_Node_freeQueryResult(ZT_Node *node,void *qr);
+ZT_SDK_API void ZT_Node_freeQueryResult(ZT_Node* node, void* qr);
 
 /**
  * Add a local interface address
@@ -2042,12 +2038,12 @@ ZT_SDK_API void ZT_Node_freeQueryResult(ZT_Node *node,void *qr);
  * @param addr Local interface address
  * @return Boolean: non-zero if address was accepted and added
  */
-ZT_SDK_API int ZT_Node_addLocalInterfaceAddress(ZT_Node *node,const struct sockaddr_storage *addr);
+ZT_SDK_API int ZT_Node_addLocalInterfaceAddress(ZT_Node* node, const struct sockaddr_storage* addr);
 
 /**
  * Clear local interface addresses
  */
-ZT_SDK_API void ZT_Node_clearLocalInterfaceAddresses(ZT_Node *node);
+ZT_SDK_API void ZT_Node_clearLocalInterfaceAddresses(ZT_Node* node);
 
 /**
  * Send a VERB_USER_MESSAGE to another ZeroTier node
@@ -2063,7 +2059,7 @@ ZT_SDK_API void ZT_Node_clearLocalInterfaceAddresses(ZT_Node *node);
  * @param len Length of data in bytes
  * @return Boolean: non-zero on success, zero on failure
  */
-ZT_SDK_API int ZT_Node_sendUserMessage(ZT_Node *node,void *tptr,uint64_t dest,uint64_t typeId,const void *data,unsigned int len);
+ZT_SDK_API int ZT_Node_sendUserMessage(ZT_Node* node, void* tptr, uint64_t dest, uint64_t typeId, const void* data, unsigned int len);
 
 /**
  * Set a network configuration master instance for this node
@@ -2080,7 +2076,7 @@ ZT_SDK_API int ZT_Node_sendUserMessage(ZT_Node *node,void *tptr,uint64_t dest,ui
  * @param networkConfigMasterInstance Instance of NetworkConfigMaster C++ class or NULL to disable
  * @return OK (0) or error code if a fatal error condition has occurred
  */
-ZT_SDK_API void ZT_Node_setNetconfMaster(ZT_Node *node,void *networkConfigMasterInstance);
+ZT_SDK_API void ZT_Node_setNetconfMaster(ZT_Node* node, void* networkConfigMasterInstance);
 
 /**
  * Set configuration for a given physical path
@@ -2090,7 +2086,7 @@ ZT_SDK_API void ZT_Node_setNetconfMaster(ZT_Node *node,void *networkConfigMaster
  * @param pathConfig Path configuration or NULL to erase this entry and therefore reset it to NULL
  * @return OK or error code
  */
-ZT_SDK_API enum ZT_ResultCode ZT_Node_setPhysicalPathConfiguration(ZT_Node *node,const struct sockaddr_storage *pathNetwork,const ZT_PhysicalPathConfiguration *pathConfig);
+ZT_SDK_API enum ZT_ResultCode ZT_Node_setPhysicalPathConfiguration(ZT_Node* node, const struct sockaddr_storage* pathNetwork, const ZT_PhysicalPathConfiguration* pathConfig);
 
 /**
  * Get ZeroTier One version
@@ -2099,7 +2095,7 @@ ZT_SDK_API enum ZT_ResultCode ZT_Node_setPhysicalPathConfiguration(ZT_Node *node
  * @param minor Result: minor version
  * @param revision Result: revision
  */
-ZT_SDK_API void ZT_version(int *major,int *minor,int *revision);
+ZT_SDK_API void ZT_version(int* major, int* minor, int* revision);
 
 #ifdef __cplusplus
 }

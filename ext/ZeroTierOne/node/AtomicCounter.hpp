@@ -1,20 +1,13 @@
-/*
- * Copyright (c)2019 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_ATOMICCOUNTER_HPP
 #define ZT_ATOMICCOUNTER_HPP
-
-#include "Constants.hpp"
 
 #ifndef __GNUC__
 #include <atomic>
@@ -25,15 +18,17 @@ namespace ZeroTier {
 /**
  * Simple atomic counter supporting increment and decrement
  */
-class AtomicCounter
-{
-public:
-	AtomicCounter() { _v = 0; }
+class AtomicCounter {
+  public:
+	AtomicCounter()
+	{
+		_v = 0;
+	}
 
 	inline int load() const
 	{
 #ifdef __GNUC__
-		return __sync_or_and_fetch(const_cast<int *>(&_v),0);
+		return __sync_or_and_fetch(const_cast<int*>(&_v), 0);
 #else
 		return _v.load();
 #endif
@@ -42,7 +37,7 @@ public:
 	inline int operator++()
 	{
 #ifdef __GNUC__
-		return __sync_add_and_fetch(&_v,1);
+		return __sync_add_and_fetch(&_v, 1);
 #else
 		return ++_v;
 #endif
@@ -51,15 +46,20 @@ public:
 	inline int operator--()
 	{
 #ifdef __GNUC__
-		return __sync_sub_and_fetch(&_v,1);
+		return __sync_sub_and_fetch(&_v, 1);
 #else
 		return --_v;
 #endif
 	}
 
-private:
-	AtomicCounter(const AtomicCounter &) {}
-	const AtomicCounter &operator=(const AtomicCounter &) { return *this; }
+  private:
+	AtomicCounter(const AtomicCounter&)
+	{
+	}
+	const AtomicCounter& operator=(const AtomicCounter&)
+	{
+		return *this;
+	}
 
 #ifdef __GNUC__
 	int _v;
@@ -68,6 +68,6 @@ private:
 #endif
 };
 
-} // namespace ZeroTier
+}	// namespace ZeroTier
 
 #endif

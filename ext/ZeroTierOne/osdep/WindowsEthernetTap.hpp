@@ -1,40 +1,32 @@
-/*
- * Copyright (c)2019 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_WINDOWSETHERNETTAP_HPP
 #define ZT_WINDOWSETHERNETTAP_HPP
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <ifdef.h>
-
-#include <string>
-#include <queue>
-#include <stdexcept>
-
 #include "../node/Constants.hpp"
-#include "../node/Mutex.hpp"
-#include "../node/MulticastGroup.hpp"
 #include "../node/InetAddress.hpp"
+#include "../node/MulticastGroup.hpp"
+#include "../node/Mutex.hpp"
 #include "../osdep/Thread.hpp"
 #include "EthernetTap.hpp"
 
+#include <ifdef.h>
+#include <queue>
+#include <stdexcept>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+
 namespace ZeroTier {
 
-class WindowsEthernetTap : public EthernetTap
-{
-public:
+class WindowsEthernetTap : public EthernetTap {
+  public:
 	/**
 	 * Installs a new instance of the ZT tap driver
 	 *
@@ -42,7 +34,7 @@ public:
 	 * @param deviceInstanceId Buffer to fill with device instance ID on success (and if SetupDiGetDeviceInstanceIdA succeeds, which it should)
 	 * @return Empty string on success, otherwise an error message
 	 */
-	static std::string addNewPersistentTapDevice(const char *pathToInf,std::string &deviceInstanceId);
+	static std::string addNewPersistentTapDevice(const char* pathToInf, std::string& deviceInstanceId);
 
 	/**
 	 * Uninstalls all persistent tap devices that have legacy drivers
@@ -64,7 +56,7 @@ public:
 	 * @param instanceId Device instance ID
 	 * @return Empty string on success, otherwise an error message
 	 */
-	static std::string deletePersistentTapDevice(const char *instanceId);
+	static std::string deletePersistentTapDevice(const char* instanceId);
 
 	/**
 	 * Disable a persistent tap device by instance ID
@@ -73,51 +65,62 @@ public:
 	 * @param enabled Enable device?
 	 * @return True if device was found and disabled
 	 */
-	static bool setPersistentTapDeviceState(const char *instanceId,bool enabled);
+	static bool setPersistentTapDeviceState(const char* instanceId, bool enabled);
 
 	WindowsEthernetTap(
-		const char *hp,
-		const MAC &mac,
+		const char* hp,
+		const MAC& mac,
 		unsigned int mtu,
 		unsigned int metric,
 		uint64_t nwid,
-		const char *friendlyName,
-		void (*handler)(void *,void *,uint64_t,const MAC &,const MAC &,unsigned int,unsigned int,const void *,unsigned int),
-		void *arg);
+		const char* friendlyName,
+		void (*handler)(void*, void*, uint64_t, const MAC&, const MAC&, unsigned int, unsigned int, const void*, unsigned int),
+		void* arg);
 
 	virtual ~WindowsEthernetTap();
 
 	virtual void setEnabled(bool en);
 	virtual bool enabled() const;
-	virtual bool addIp(const InetAddress &ip);
-	virtual bool removeIp(const InetAddress &ip);
+	virtual bool addIp(const InetAddress& ip);
+	virtual bool removeIp(const InetAddress& ip);
 	virtual std::vector<InetAddress> ips() const;
-	virtual void put(const MAC &from,const MAC &to,unsigned int etherType,const void *data,unsigned int len);
+	virtual void put(const MAC& from, const MAC& to, unsigned int etherType, const void* data, unsigned int len);
 	virtual std::string deviceName() const;
-	virtual void setFriendlyName(const char *friendlyName);
+	virtual void setFriendlyName(const char* friendlyName);
 	virtual std::string friendlyName() const;
-	virtual void scanMulticastGroups(std::vector<MulticastGroup> &added,std::vector<MulticastGroup> &removed);
+	virtual void scanMulticastGroups(std::vector<MulticastGroup>& added, std::vector<MulticastGroup>& removed);
 	virtual void setMtu(unsigned int mtu);
-	virtual void setDns(const char* domain, const std::vector<InetAddress> &servers);
+	virtual void setDns(const char* domain, const std::vector<InetAddress>& servers);
 
-	inline const NET_LUID &luid() const { return _deviceLuid; }
-	inline const GUID &guid() const { return _deviceGuid; }
-	inline const std::string &instanceId() const { return _deviceInstanceId; }
+	inline const NET_LUID& luid() const
+	{
+		return _deviceLuid;
+	}
+	inline const GUID& guid() const
+	{
+		return _deviceGuid;
+	}
+	inline const std::string& instanceId() const
+	{
+		return _deviceInstanceId;
+	}
 	NET_IFINDEX interfaceIndex() const;
 
-	void threadMain()
-		throw();
+	void threadMain() throw();
 
-	bool isInitialized() const { return _initialized; };
+	bool isInitialized() const
+	{
+		return _initialized;
+	};
 
-private:
-	NET_IFINDEX _getDeviceIndex(); // throws on failure
-	std::vector<std::string> _getRegistryIPv4Value(const char *regKey);
-	void _setRegistryIPv4Value(const char *regKey,const std::vector<std::string> &value);
+  private:
+	NET_IFINDEX _getDeviceIndex();	 // throws on failure
+	std::vector<std::string> _getRegistryIPv4Value(const char* regKey);
+	void _setRegistryIPv4Value(const char* regKey, const std::vector<std::string>& value);
 	void _syncIps();
 
-	void (*_handler)(void *,void *,uint64_t,const MAC &,const MAC &,unsigned int,unsigned int,const void *,unsigned int);
-	void *_arg;
+	void (*_handler)(void*, void*, uint64_t, const MAC&, const MAC&, unsigned int, unsigned int, const void*, unsigned int);
+	void* _arg;
 	MAC _mac;
 	uint64_t _nwid;
 	volatile unsigned int _mtu;
@@ -134,13 +137,12 @@ private:
 	std::string _friendlyName;
 	Mutex _friendlyName_m;
 
-	std::vector<InetAddress> _assignedIps; // IPs assigned with addIp
+	std::vector<InetAddress> _assignedIps;	 // IPs assigned with addIp
 	Mutex _assignedIps_m;
 
 	std::vector<MulticastGroup> _multicastGroups;
 
-	struct _InjectPending
-	{
+	struct _InjectPending {
 		unsigned int len;
 		char data[ZT_MAX_MTU + 32];
 	};
@@ -157,6 +159,6 @@ private:
 	mutable uint64_t _lastIfAddrsUpdate;
 };
 
-} // namespace ZeroTier
+}	// namespace ZeroTier
 
 #endif

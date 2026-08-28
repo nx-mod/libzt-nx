@@ -1,15 +1,10 @@
-/*
- * Copyright (c)2013-2020 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_CONSTANTS_HPP
 #define ZT_CONSTANTS_HPP
@@ -67,8 +62,8 @@
 #ifdef ZT_SSO_SUPPORTED
 #define ZT_SSO_ENABLED 1
 #endif
-#define likely(x) __builtin_expect((x),1)
-#define unlikely(x) __builtin_expect((x),0)
+#define likely(x)	__builtin_expect((x), 1)
+#define unlikely(x) __builtin_expect((x), 0)
 #include <TargetConditionals.h>
 #ifndef __UNIX_LIKE__
 #define __UNIX_LIKE__
@@ -91,9 +86,9 @@
 #endif
 #include <machine/endian.h>
 #ifndef __BYTE_ORDER
-#define __BYTE_ORDER _BYTE_ORDER
+#define __BYTE_ORDER	_BYTE_ORDER
 #define __LITTLE_ENDIAN _LITTLE_ENDIAN
-#define __BIG_ENDIAN _BIG_ENDIAN
+#define __BIG_ENDIAN	_BIG_ENDIAN
 #endif
 #endif
 
@@ -112,25 +107,25 @@
 #pragma warning(disable : 4101)
 #undef __UNIX_LIKE__
 #undef __BSD__
-#include <winsock2.h>
 #include <windows.h>
+#include <winsock2.h>
 #endif
 
 #ifdef __NetBSD__
 #ifndef RTF_MULTICAST
-#define RTF_MULTICAST   0x20000000
+#define RTF_MULTICAST 0x20000000
 #endif
 #endif
 
 #if (defined(__amd64) || defined(__amd64__) || defined(__x86_64) || defined(__x86_64__) || defined(__AMD64) || defined(__AMD64__) || defined(_M_X64))
 #define ZT_ARCH_X64 1
-#include <xmmintrin.h>
 #include <emmintrin.h>
 #include <immintrin.h>
+#include <xmmintrin.h>
 #endif
 
 #if (defined(__ARM_NEON) || defined(__ARM_NEON__) || defined(ZT_ARCH_ARM_HAS_NEON))
-#if (defined(__APPLE__) && !defined(__LP64__)) || (defined(__ANDROID__) && defined(__arm__))
+#if (defined(__APPLE__) && ! defined(__LP64__)) || (defined(__ANDROID__) && defined(__arm__))
 #ifdef ZT_ARCH_ARM_HAS_NEON
 #undef ZT_ARCH_ARM_HAS_NEON
 #endif
@@ -151,7 +146,8 @@
 #endif
 
 // Define ZT_NO_TYPE_PUNNING to disable reckless casts on anything other than x86/x64.
-#if (!(defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_AMD64) || defined(_M_X64) || defined(i386) || defined(__i386) || defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__) || defined(_M_IX86) || defined(__X86__) || defined(_X86_) || defined(__I86__) || defined(__INTEL__) || defined(__386)))
+#if (! (defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_AMD64) || defined(_M_X64) || defined(i386) || defined(__i386) || defined(__i386__) || defined(__i486__) || defined(__i586__)          \
+		|| defined(__i686__) || defined(_M_IX86) || defined(__X86__) || defined(_X86_) || defined(__I86__) || defined(__INTEL__) || defined(__386)))
 #ifndef ZT_NO_TYPE_PUNNING
 #define ZT_NO_TYPE_PUNNING 1
 #endif
@@ -163,23 +159,23 @@
 #endif
 
 // Assume little endian if not defined
-#if (defined(__APPLE__) || defined(__WINDOWS__)) && (!defined(__BYTE_ORDER))
+#if (defined(__APPLE__) || defined(__WINDOWS__)) && (! defined(__BYTE_ORDER))
 #undef __BYTE_ORDER
 #undef __LITTLE_ENDIAN
 #undef __BIG_ENDIAN
-#define __BIG_ENDIAN 4321
+#define __BIG_ENDIAN	4321
 #define __LITTLE_ENDIAN 1234
-#define __BYTE_ORDER 1234
+#define __BYTE_ORDER	1234
 #endif
 
 #ifdef __WINDOWS__
-#define ZT_PATH_SEPARATOR '\\'
+#define ZT_PATH_SEPARATOR	'\\'
 #define ZT_PATH_SEPARATOR_S "\\"
-#define ZT_EOL_S "\r\n"
+#define ZT_EOL_S			"\r\n"
 #else
-#define ZT_PATH_SEPARATOR '/'
+#define ZT_PATH_SEPARATOR	'/'
 #define ZT_PATH_SEPARATOR_S "/"
-#define ZT_EOL_S "\n"
+#define ZT_EOL_S			"\n"
 #endif
 
 #ifndef __BYTE_ORDER
@@ -188,10 +184,10 @@
 
 #if (defined(__GNUC__) && (__GNUC__ >= 3)) || (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 800)) || defined(__clang__)
 #ifndef likely
-#define likely(x) __builtin_expect((x),1)
+#define likely(x) __builtin_expect((x), 1)
 #endif
 #ifndef unlikely
-#define unlikely(x) __builtin_expect((x),0)
+#define unlikely(x) __builtin_expect((x), 0)
 #endif
 #else
 #ifndef likely
@@ -203,10 +199,76 @@
 #endif
 
 #ifdef __WINDOWS__
-#define ZT_PACKED_STRUCT(D) __pragma(pack(push,1)) D __pragma(pack(pop))
+#define ZT_PACKED_STRUCT(D) __pragma(pack(push, 1)) D __pragma(pack(pop))
 #else
 #define ZT_PACKED_STRUCT(D) D __attribute__((packed))
 #endif
+
+#if defined(_WIN32)
+#define ZT_PLATFORM_NAME "windows"	 // Windows
+#elif defined(_WIN64)
+#define ZT_PLATFORM_NAME "windows"	 // Windows
+#elif defined(__CYGWIN__)
+#define ZT_PLATFORM_NAME "windows"	 // Windows (Cygwin POSIX under Microsoft Window)
+#elif defined(__ANDROID__)
+#define ZT_PLATFORM_NAME "android"	 // Android (implies Linux, so it must come first)
+#elif defined(__linux__)
+#define ZT_PLATFORM_NAME "linux"   // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
+#elif defined(__unix__) || ! defined(__APPLE__) && defined(__MACH__)
+#include <sys/param.h>
+#if defined(BSD)
+#define ZT_PLATFORM_NAME "bsd"	 // FreeBSD, NetBSD, OpenBSD, DragonFly BSD
+#endif
+#elif defined(__hpux)
+#define ZT_PLATFORM_NAME "hp-ux"   // HP-UX
+#elif defined(_AIX)
+#define ZT_PLATFORM_NAME "aix"					// IBM AIX
+#elif defined(__APPLE__) && defined(__MACH__)	// Apple OSX and iOS (Darwin)
+#include <TargetConditionals.h>
+#if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR == 1
+#define ZT_PLATFORM_NAME "ios_sim"	 // Apple iOS
+#elif defined(TARGET_OS_IPAD) && TARGET_OS_IPAD == 1
+#define ZT_PLATFORM_NAME "ios_ipad"
+#elif defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE == 1
+#define ZT_PLATFORM_NAME "ios_iphone"	// Apple iOS
+#elif defined(TARGET_OS_MAC) && TARGET_OS_MAC == 1
+#define ZT_PLATFORM_NAME "macos"   // Apple OSX
+#endif
+#elif defined(__sun) && defined(__SVR4)
+#define ZT_PLATFORM_NAME "solaris"	 // Oracle Solaris, Open Indiana
+#else
+#define ZT_PLATFORM_NAME "unknown"
+#endif
+#ifndef ZT_PLATFORM_NAME
+#define ZT_PLATFORM_NAME "unknown"
+#endif
+
+#if defined(__amd64) || defined(__amd64__) || defined(__x86_64) || defined(__x86_64__) || defined(__AMD64) || defined(__AMD64__) || defined(_M_X64) || defined(_M_AMD64)
+#define ZT_ARCH_NAME "x86_64"
+#elif defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__) || defined(_X86_) || defined(_M_IX86) || defined(__X86__) || defined(__I86__) || defined(_M_I86)
+#define ZT_ARCH_NAME "x86"
+#elif defined(__aarch64__) || defined(__AARCH64EL__) || defined(_M_ARM64)
+#define ZT_ARCH_NAME "arm64"
+#elif defined(__arm__) || defined(__TARGET_ARCH_ARM) || defined(_ARM) || defined(_M_ARM) || defined(_M_ARMT) || defined(__arm) || defined(__thumb__)
+#define ZT_ARCH_NAME "arm"
+#elif defined(__loongarch__) || defined(_LOONGARCH_ARCH)
+#define ZT_ARCH_NAME "loongarch"
+#elif defined(__mips__) || defined(__MIPS__)
+#define ZT_ARCH_NAME "mips"
+#elif defined(__riscv) || defined(__riscv_xlen)
+#define ZT_ARCH_NAME "riscv"
+#elif defined(__powerpc__) || defined(__powerpc64__) || defined(__ppc__) || defined(__ppc64__) || defined(_M_PPC)
+#define ZT_ARCH_NAME "powerpc"
+#elif defined(__s390__) || defined(__s390x__) || defined(__zarch__)
+#define ZT_ARCH_NAME "s390"
+#else
+#define ZT_ARCH_NAME "unknown"
+#endif
+#ifndef ZT_ARCH_NAME
+#define ZT_ARCH_NAME "unknown"
+#endif
+
+#define ZT_TARGET_NAME (ZT_PLATFORM_NAME "/" ZT_ARCH_NAME)
 
 /**
  * Length of a ZeroTier address in bytes
@@ -406,6 +468,11 @@
 #define ZT_QOS_SHORTTERM_SAMPLE_WIN_SIZE 64
 
 /**
+ * Number of samples required before statistics summaries are computed
+ */
+#define ZT_QOS_SHORTTERM_SAMPLE_WIN_MIN_REQ_SIZE 4
+
+/**
  * Max allowable time spent in any queue (in ms)
  */
 #define ZT_AQM_TARGET 5
@@ -515,23 +582,23 @@
 /**
  * Drainage constants for VERB_ECHO rate-limiters
  */
-#define ZT_ECHO_CUTOFF_LIMIT ((1000 / ZT_CORE_TIMER_TASK_GRANULARITY) * ZT_MAX_PEER_NETWORK_PATHS)
+#define ZT_ECHO_CUTOFF_LIMIT	 ((1000 / ZT_CORE_TIMER_TASK_GRANULARITY) * ZT_MAX_PEER_NETWORK_PATHS)
 #define ZT_ECHO_DRAINAGE_DIVISOR (1000 / ZT_ECHO_CUTOFF_LIMIT)
 
 /**
  * Drainage constants for VERB_QOS rate-limiters
  */
-#define ZT_QOS_CUTOFF_LIMIT ((1000 / ZT_CORE_TIMER_TASK_GRANULARITY) * ZT_MAX_PEER_NETWORK_PATHS)
+#define ZT_QOS_CUTOFF_LIMIT		((1000 / ZT_CORE_TIMER_TASK_GRANULARITY) * ZT_MAX_PEER_NETWORK_PATHS)
 #define ZT_QOS_DRAINAGE_DIVISOR (1000 / ZT_QOS_CUTOFF_LIMIT)
 
 /**
  * Drainage constants for VERB_ACK rate-limiters
  */
-#define ZT_ACK_CUTOFF_LIMIT 128
+#define ZT_ACK_CUTOFF_LIMIT		128
 #define ZT_ACK_DRAINAGE_DIVISOR (1000 / ZT_ACK_CUTOFF_LIMIT)
 
 #define ZT_BOND_DEFAULT_REFRACTORY_PERIOD 8000
-#define ZT_BOND_MAX_REFRACTORY_PERIOD 600000
+#define ZT_BOND_MAX_REFRACTORY_PERIOD	  600000
 
 /**
  * Maximum number of direct path pushes within cutoff time
@@ -566,7 +633,6 @@
  * General rate limit for other kinds of rate-limited packets (HELLO, credential request, etc.) both inbound and outbound
  */
 #define ZT_PEER_GENERAL_RATE_LIMIT 1000
-
 
 /**
  * Minimum allowed amount of time between flow/path optimizations (anti-flapping)
@@ -644,8 +710,8 @@
  * Artificially inflates the failover score for paths which meet
  * certain non-performance-related policy ranking criteria.
  */
-#define ZT_BOND_FAILOVER_HANDICAP_PREFERRED  500
-#define ZT_BOND_FAILOVER_HANDICAP_PRIMARY    1000
+#define ZT_BOND_FAILOVER_HANDICAP_PREFERRED	 500
+#define ZT_BOND_FAILOVER_HANDICAP_PRIMARY	 1000
 #define ZT_BOND_FAILOVER_HANDICAP_NEGOTIATED 5000
 
 /**
@@ -689,14 +755,14 @@
 #define ZT_THREAD_MIN_STACK_SIZE 1048576
 
 // Exceptions thrown in core ZT code
-#define ZT_EXCEPTION_OUT_OF_BOUNDS 100
-#define ZT_EXCEPTION_OUT_OF_MEMORY 101
-#define ZT_EXCEPTION_PRIVATE_KEY_REQUIRED 102
-#define ZT_EXCEPTION_INVALID_ARGUMENT 103
-#define ZT_EXCEPTION_INVALID_IDENTITY 104
-#define ZT_EXCEPTION_INVALID_SERIALIZED_DATA_INVALID_TYPE 200
-#define ZT_EXCEPTION_INVALID_SERIALIZED_DATA_OVERFLOW 201
+#define ZT_EXCEPTION_OUT_OF_BOUNDS										 100
+#define ZT_EXCEPTION_OUT_OF_MEMORY										 101
+#define ZT_EXCEPTION_PRIVATE_KEY_REQUIRED								 102
+#define ZT_EXCEPTION_INVALID_ARGUMENT									 103
+#define ZT_EXCEPTION_INVALID_IDENTITY									 104
+#define ZT_EXCEPTION_INVALID_SERIALIZED_DATA_INVALID_TYPE				 200
+#define ZT_EXCEPTION_INVALID_SERIALIZED_DATA_OVERFLOW					 201
 #define ZT_EXCEPTION_INVALID_SERIALIZED_DATA_INVALID_CRYPTOGRAPHIC_TOKEN 202
-#define ZT_EXCEPTION_INVALID_SERIALIZED_DATA_BAD_ENCODING 203
+#define ZT_EXCEPTION_INVALID_SERIALIZED_DATA_BAD_ENCODING				 203
 
 #endif

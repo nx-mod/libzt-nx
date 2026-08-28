@@ -6,16 +6,19 @@
 /zerotier
 /nltest
 
-# IDE stuff
+# IDE and dev tool stuff
 /.idea
 /.nova
 /compile_commands.json
+/.claude
+/.aider
 
 # OS-created garbage files from various platforms
 .DS_Store
 .Apple*
 Thumbs.db
 @eaDir
+lost+found
 ._*
 
 # Windows build droppings
@@ -58,6 +61,9 @@ zt1-src.tar.gz
 /MacEthernetTapAgent
 
 # Miscellaneous temporaries, build files, etc.
+ext/installfiles/windows/*.back*.aip
+tcp-proxy/tcp-proxy
+rustybits/target
 *.log
 *.opensdf
 *.user
@@ -85,6 +91,7 @@ debian/zerotier-one*.debhelper
 debian/*.log
 debian/zerotier-one.substvars
 root-watcher/config.json
+build/
 
 # Java/Android/JNI build droppings
 java/obj/
@@ -100,8 +107,8 @@ windows/WinUI/bin/
 windows/ZeroTierOne/Debug/
 /ext/installfiles/windows/chocolatey/zerotier-one/*.nupkg
 
+
 # Miscellaneous mac/Xcode droppings
-.DS_Store
 .Trashes
 *.swp
 *~.nib
@@ -124,17 +131,18 @@ attic/world/mkworld
 workspace/
 workspace2/
 zeroidc/target/
+tcp-proxy/target
 
-#snapcraft specifics
+# Snapcraft Linux build stuff
 /parts/
 /stage/
 /prime/
-
 *.snap
-
 .snapcraft
 __pycache__
 *.pyc
 *_source.tar.bz2
 snap/.snapcraft
-tcp-proxy/tcp-proxy
+
+# local Claude configurations
+.claude/*.local.*

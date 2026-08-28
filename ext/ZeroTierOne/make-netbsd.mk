@@ -1,12 +1,21 @@
 CC=gcc
 CXX=g++
 
-INCLUDES=
+INCLUDES=-Iext/opentelemetry-cpp-api-only/include
 DEFS=
 LIBS=
 
 include objects.mk
 OBJS+=osdep/NetBSDEthernetTap.o ext/lz4/lz4.o ext/json-parser/json.o ext/http-parser/http_parser.o
+
+ifeq ($(ZT_CONTROLLER),1)
+	ZT_NONFREE=1
+endif
+ifeq ($(ZT_NONFREE),1)
+	include objects-nonfree.mk
+	ONE_OBJS+=$(CONTROLLER_OBJS)
+	override DEFS += -DZT_NONFREE_CONTROLLER
+endif
 
 # "make official" is a shortcut for this
 ifeq ($(ZT_OFFICIAL_RELEASE),1)
@@ -53,7 +62,7 @@ selftest:	$(OBJS) selftest.o
 #	./buildinstaller.sh
 
 clean:
-	rm -rf *.o node/*.o controller/*.o osdep/*.o service/*.o ext/http-parser/*.o ext/lz4/*.o ext/json-parser/*.o build-* zerotier-one zerotier-idtool zerotier-selftest zerotier-cli ZeroTierOneInstaller-*
+	rm -rf *.o node/*.o nonfree/controller/*.o osdep/*.o service/*.o ext/http-parser/*.o ext/lz4/*.o ext/json-parser/*.o build-* zerotier-one zerotier-idtool zerotier-selftest zerotier-cli ZeroTierOneInstaller-*
 
 debug:	FORCE
 	make -j 4 ZT_DEBUG=1

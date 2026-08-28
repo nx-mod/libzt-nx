@@ -1,33 +1,27 @@
-/*
- * Copyright (c)2013-2020 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_PATH_HPP
 #define ZT_PATH_HPP
 
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include <stdexcept>
-#include <algorithm>
-
+#include "AtomicCounter.hpp"
 #include "Constants.hpp"
 #include "InetAddress.hpp"
-#include "SharedPtr.hpp"
-#include "AtomicCounter.hpp"
-#include "Utils.hpp"
 #include "Packet.hpp"
 #include "RingBuffer.hpp"
+#include "SharedPtr.hpp"
+#include "Utils.hpp"
+
+#include <algorithm>
+#include <stdexcept>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Maximum return value of preferenceRank()
@@ -41,87 +35,102 @@ class RuntimeEnvironment;
 /**
  * A path across the physical network
  */
-class Path
-{
+class Path {
 	friend class SharedPtr<Path>;
 	friend class Bond;
 
-public:
+  public:
 	/**
 	 * Efficient unique key for paths in a Hashtable
 	 */
-	class HashKey
-	{
-	public:
-		HashKey() {}
+	class HashKey {
+	  public:
+		HashKey()
+		{
+		}
 
-		HashKey(const int64_t l,const InetAddress &r)
+		HashKey(const int64_t l, const InetAddress& r)
 		{
 			if (r.ss_family == AF_INET) {
-				_k[0] = (uint64_t)reinterpret_cast<const struct sockaddr_in *>(&r)->sin_addr.s_addr;
-				_k[1] = (uint64_t)reinterpret_cast<const struct sockaddr_in *>(&r)->sin_port;
+				_k[0] = (uint64_t)reinterpret_cast<const struct sockaddr_in*>(&r)->sin_addr.s_addr;
+				_k[1] = (uint64_t)reinterpret_cast<const struct sockaddr_in*>(&r)->sin_port;
 				_k[2] = (uint64_t)l;
-			} else if (r.ss_family == AF_INET6) {
-				memcpy(_k,reinterpret_cast<const struct sockaddr_in6 *>(&r)->sin6_addr.s6_addr,16);
-				_k[2] = ((uint64_t)reinterpret_cast<const struct sockaddr_in6 *>(&r)->sin6_port << 32) ^ (uint64_t)l;
-			} else {
-				memcpy(_k,&r,std::min(sizeof(_k),sizeof(InetAddress)));
+			}
+			else if (r.ss_family == AF_INET6) {
+				memcpy(_k, reinterpret_cast<const struct sockaddr_in6*>(&r)->sin6_addr.s6_addr, 16);
+				_k[2] = ((uint64_t)reinterpret_cast<const struct sockaddr_in6*>(&r)->sin6_port << 32) ^ (uint64_t)l;
+			}
+			else {
+				memcpy(_k, &r, std::min(sizeof(_k), sizeof(InetAddress)));
 				_k[2] += (uint64_t)l;
 			}
 		}
 
-		inline unsigned long hashCode() const { return (unsigned long)(_k[0] + _k[1] + _k[2]); }
+		inline unsigned long hashCode() const
+		{
+			return (unsigned long)(_k[0] + _k[1] + _k[2]);
+		}
 
-		inline bool operator==(const HashKey &k) const { return ( (_k[0] == k._k[0]) && (_k[1] == k._k[1]) && (_k[2] == k._k[2]) ); }
-		inline bool operator!=(const HashKey &k) const { return (!(*this == k)); }
+		inline bool operator==(const HashKey& k) const
+		{
+			return ((_k[0] == k._k[0]) && (_k[1] == k._k[1]) && (_k[2] == k._k[2]));
+		}
+		inline bool operator!=(const HashKey& k) const
+		{
+			return (! (*this == k));
+		}
 
-	private:
+	  private:
 		uint64_t _k[3];
 	};
 
-	Path() :
-		_lastOut(0),
-		_lastIn(0),
-		_lastTrustEstablishedPacketReceived(0),
-		_lastEchoRequestReceived(0),
-		_localSocket(-1),
-		_latencyMean(0.0),
-		_latencyVariance(0.0),
-		_packetLossRatio(0.0),
-		_packetErrorRatio(0.0),
-		_assignedFlowCount(0),
-		_valid(true),
-		_eligible(false),
-		_bonded(false),
-		_mtu(0),
-		_givenLinkSpeed(0),
-		_relativeQuality(0),
-		_latency(0xffff),
-		_addr(),
-		_ipScope(InetAddress::IP_SCOPE_NONE)
-		{}
+	Path()
+		: _lastOut(0)
+		, _lastIn(0)
+		, _lastTrustEstablishedPacketReceived(0)
+		, _lastEchoRequestReceived(0)
+		, _localPort(0)
+		, _localSocket(-1)
+		, _latencyMean(0.0)
+		, _latencyVariance(0.0)
+		, _packetLossRatio(0.0)
+		, _packetErrorRatio(0.0)
+		, _assignedFlowCount(0)
+		, _valid(true)
+		, _eligible(false)
+		, _bonded(false)
+		, _mtu(0)
+		, _givenLinkSpeed(0)
+		, _relativeQuality(0)
+		, _latency(0xffff)
+		, _addr()
+		, _ipScope(InetAddress::IP_SCOPE_NONE)
+	{
+	}
 
-	Path(const int64_t localSocket,const InetAddress &addr) :
-		_lastOut(0),
-		_lastIn(0),
-		_lastTrustEstablishedPacketReceived(0),
-		_lastEchoRequestReceived(0),
-		_localSocket(localSocket),
-		_latencyMean(0.0),
-		_latencyVariance(0.0),
-		_packetLossRatio(0.0),
-		_packetErrorRatio(0.0),
-		_assignedFlowCount(0),
-		_valid(true),
-		_eligible(false),
-		_bonded(false),
-		_mtu(0),
-		_givenLinkSpeed(0),
-		_relativeQuality(0),
-		_latency(0xffff),
-		_addr(addr),
-		_ipScope(addr.ipScope())
-	{}
+	Path(const int64_t localSocket, const InetAddress& addr)
+		: _lastOut(0)
+		, _lastIn(0)
+		, _lastTrustEstablishedPacketReceived(0)
+		, _lastEchoRequestReceived(0)
+		, _localPort(0)
+		, _localSocket(localSocket)
+		, _latencyMean(0.0)
+		, _latencyVariance(0.0)
+		, _packetLossRatio(0.0)
+		, _packetErrorRatio(0.0)
+		, _assignedFlowCount(0)
+		, _valid(true)
+		, _eligible(false)
+		, _bonded(false)
+		, _mtu(0)
+		, _givenLinkSpeed(0)
+		, _relativeQuality(0)
+		, _latency(0xffff)
+		, _addr(addr)
+		, _ipScope(addr.ipScope())
+	{
+	}
 
 	/**
 	 * Called when a packet is received from this remote path, regardless of content
@@ -136,7 +145,10 @@ public:
 	/**
 	 * Set time last trusted packet was received (done in Peer::received())
 	 */
-	inline void trustedPacketReceived(const uint64_t t) { _lastTrustEstablishedPacketReceived = t; }
+	inline void trustedPacketReceived(const uint64_t t)
+	{
+		_lastTrustEstablishedPacketReceived = t;
+	}
 
 	/**
 	 * Send a packet via this path (last out time is also updated)
@@ -148,14 +160,17 @@ public:
 	 * @param now Current time
 	 * @return True if transport reported success
 	 */
-	bool send(const RuntimeEnvironment *RR,void *tPtr,const void *data,unsigned int len,int64_t now);
+	bool send(const RuntimeEnvironment* RR, void* tPtr, const void* data, unsigned int len, int64_t now);
 
 	/**
 	 * Manually update last sent time
 	 *
 	 * @param t Time of send
 	 */
-	inline void sent(const int64_t t) { _lastOut = t; }
+	inline void sent(const int64_t t)
+	{
+		_lastOut = t;
+	}
 
 	/**
 	 * Update path latency with a new measurement
@@ -167,7 +182,8 @@ public:
 		unsigned int pl = _latency;
 		if (pl < 0xffff) {
 			_latency = (pl + l) / 2;
-		} else {
+		}
+		else {
 			_latency = l;
 		}
 	}
@@ -175,22 +191,42 @@ public:
 	/**
 	 * @return Local socket as specified by external code
 	 */
-	inline int64_t localSocket() const { return _localSocket; }
+	inline int64_t localSocket() const
+	{
+		return _localSocket;
+	}
+
+	/**
+	 * @return Local port corresponding to the localSocket
+	 */
+	inline int64_t localPort() const
+	{
+		return _localPort;
+	}
 
 	/**
 	 * @return Physical address
 	 */
-	inline const InetAddress &address() const { return _addr; }
+	inline const InetAddress& address() const
+	{
+		return _addr;
+	}
 
 	/**
 	 * @return IP scope -- faster shortcut for address().ipScope()
 	 */
-	inline InetAddress::IpScope ipScope() const { return _ipScope; }
+	inline InetAddress::IpScope ipScope() const
+	{
+		return _ipScope;
+	}
 
 	/**
 	 * @return True if path has received a trust established packet (e.g. common network membership) in the past ZT_TRUST_EXPIRATION ms
 	 */
-	inline bool trustEstablished(const int64_t now) const { return ((now - _lastTrustEstablishedPacketReceived) < ZT_TRUST_EXPIRATION); }
+	inline bool trustEstablished(const int64_t now) const
+	{
+		return ((now - _lastTrustEstablishedPacketReceived) < ZT_TRUST_EXPIRATION);
+	}
 
 	/**
 	 * @return Preference rank, higher == better
@@ -199,7 +235,7 @@ public:
 	{
 		// This causes us to rank paths in order of IP scope rank (see InetAddress.hpp) but
 		// within each IP scope class to prefer IPv6 over IPv4.
-		return ( ((unsigned int)_ipScope << 1) | (unsigned int)(_addr.ss_family == AF_INET6) );
+		return (((unsigned int)_ipScope << 1) | (unsigned int)(_addr.ss_family == AF_INET6));
 	}
 
 	/**
@@ -211,10 +247,10 @@ public:
 	 * @param a Address to check
 	 * @return True if address is good for ZeroTier path use
 	 */
-	static inline bool isAddressValidForPath(const InetAddress &a)
+	static inline bool isAddressValidForPath(const InetAddress& a)
 	{
-		if ((a.ss_family == AF_INET)||(a.ss_family == AF_INET6)) {
-			switch(a.ipScope()) {
+		if ((a.ss_family == AF_INET) || (a.ss_family == AF_INET6)) {
+			switch (a.ipScope()) {
 				/* Note: we don't do link-local at the moment. Unfortunately these
 				 * cause several issues. The first is that they usually require a
 				 * device qualifier, which we don't handle yet and can't portably
@@ -230,8 +266,8 @@ public:
 						// TEMPORARY HACK: for now, we are going to blacklist he.net IPv6
 						// tunnels due to very spotty performance and low MTU issues over
 						// these IPv6 tunnel links.
-						const uint8_t *ipd = reinterpret_cast<const uint8_t *>(reinterpret_cast<const struct sockaddr_in6 *>(&a)->sin6_addr.s6_addr);
-						if ((ipd[0] == 0x20)&&(ipd[1] == 0x01)&&(ipd[2] == 0x04)&&(ipd[3] == 0x70)) {
+						const uint8_t* ipd = reinterpret_cast<const uint8_t*>(reinterpret_cast<const struct sockaddr_in6*>(&a)->sin6_addr.s6_addr);
+						if ((ipd[0] == 0x20) && (ipd[1] == 0x01) && (ipd[2] == 0x04) && (ipd[3] == 0x70)) {
 							return false;
 						}
 					}
@@ -246,7 +282,10 @@ public:
 	/**
 	 * @return Latency or 0xffff if unknown
 	 */
-	inline unsigned int latency() const { return _latency; }
+	inline unsigned int latency() const
+	{
+		return _latency;
+	}
 
 	/**
 	 * @return Path quality -- lower is better
@@ -254,41 +293,57 @@ public:
 	inline long quality(const int64_t now) const
 	{
 		const int l = (long)_latency;
-		const int age = (long)std::min((now - _lastIn),(int64_t)(ZT_PATH_HEARTBEAT_PERIOD * 10)); // set an upper sanity limit to avoid overflow
+		const int age = (long)std::min((now - _lastIn), (int64_t)(ZT_PATH_HEARTBEAT_PERIOD * 10));	 // set an upper sanity limit to avoid overflow
 		return (((age < (ZT_PATH_HEARTBEAT_PERIOD + 5000)) ? l : (l + 0xffff + age)) * (long)((ZT_INETADDRESS_MAX_SCOPE - _ipScope) + 1));
 	}
 
 	/**
 	 * @return True if this path is alive (receiving heartbeats)
 	 */
-	inline bool alive(const int64_t now) const {
+	inline bool alive(const int64_t now) const
+	{
 		return (now - _lastIn) < (ZT_PATH_HEARTBEAT_PERIOD + 5000);
 	}
 
 	/**
 	 * @return True if this path needs a heartbeat
 	 */
-	inline bool needsHeartbeat(const int64_t now) const { return ((now - _lastOut) >= ZT_PATH_HEARTBEAT_PERIOD); }
+	inline bool needsHeartbeat(const int64_t now) const
+	{
+		return ((now - _lastOut) >= ZT_PATH_HEARTBEAT_PERIOD);
+	}
 
 	/**
 	 * @return Last time we sent something
 	 */
-	inline int64_t lastOut() const { return _lastOut; }
+	inline int64_t lastOut() const
+	{
+		return _lastOut;
+	}
 
 	/**
 	 * @return Last time we received anything
 	 */
-	inline int64_t lastIn() const { return _lastIn; }
+	inline int64_t lastIn() const
+	{
+		return _lastIn;
+	}
 
 	/**
 	 * @return the age of the path in terms of receiving packets
 	 */
-	inline int64_t age(int64_t now) { return (now - _lastIn); }
+	inline int64_t age(int64_t now)
+	{
+		return (now - _lastIn);
+	}
 
 	/**
 	 * @return Time last trust-established packet was received
 	 */
-	inline int64_t lastTrustEstablishedPacketReceived() const { return _lastTrustEstablishedPacketReceived; }
+	inline int64_t lastTrustEstablishedPacketReceived() const
+	{
+		return _lastTrustEstablishedPacketReceived;
+	}
 
 	/**
 	 * Rate limit gate for inbound ECHO requests
@@ -305,69 +360,102 @@ public:
 	/**
 	 * @return Mean latency as reported by the bonding layer
 	 */
-	inline float latencyMean() const { return _latencyMean; }
+	inline float latencyMean() const
+	{
+		return _latencyMean;
+	}
 
 	/**
 	 * @return Latency variance as reported by the bonding layer
 	 */
-	inline float latencyVariance() const { return _latencyVariance; }
+	inline float latencyVariance() const
+	{
+		return _latencyVariance;
+	}
 
 	/**
 	 * @return Packet Loss Ratio as reported by the bonding layer
 	 */
-	inline float packetLossRatio() const { return _packetLossRatio; }
+	inline float packetLossRatio() const
+	{
+		return _packetLossRatio;
+	}
 
 	/**
 	 * @return Packet Error Ratio as reported by the bonding layer
 	 */
-	inline float packetErrorRatio() const { return _packetErrorRatio; }
+	inline float packetErrorRatio() const
+	{
+		return _packetErrorRatio;
+	}
 
 	/**
 	 * @return Number of flows assigned to this path
 	 */
-	inline unsigned int assignedFlowCount() const { return _assignedFlowCount; }
+	inline unsigned int assignedFlowCount() const
+	{
+		return _assignedFlowCount;
+	}
 
 	/**
 	 * @return Whether this path is valid as reported by the bonding layer. The bonding layer
 	 * actually checks with Phy to see if the interface is still up
 	 */
-	inline bool valid() const { return _valid; }
+	inline bool valid() const
+	{
+		return _valid;
+	}
 
 	/**
 	 * @return Whether this path is eligible for use in a bond as reported by the bonding layer
 	 */
-	inline bool eligible() const { return _eligible; }
+	inline bool eligible() const
+	{
+		return _eligible;
+	}
 
 	/**
 	 * @return Whether this path is bonded as reported by the bonding layer
 	 */
-	inline bool bonded() const { return _bonded; }
+	inline bool bonded() const
+	{
+		return _bonded;
+	}
 
 	/**
 	 * @return Whether the user-specified MTU for this path (determined by MTU for parent link)
 	 */
-	inline uint16_t mtu() const { return _mtu; }
+	inline uint16_t mtu() const
+	{
+		return _mtu;
+	}
 
 	/**
 	 * @return Given link capacity as reported by the bonding layer
 	 */
-	inline uint32_t givenLinkSpeed() const { return _givenLinkSpeed; }
+	inline uint32_t givenLinkSpeed() const
+	{
+		return _givenLinkSpeed;
+	}
 
 	/**
 	 * @return Path's quality as reported by the bonding layer
 	 */
-	inline float relativeQuality() const { return _relativeQuality; }
+	inline float relativeQuality() const
+	{
+		return _relativeQuality;
+	}
 
 	/**
 	 * @return Physical interface name that this path lives on
 	 */
-	char *ifname() {
+	char* ifname()
+	{
 		return _ifname;
 	}
 
-private:
-
-	char _ifname[ZT_MAX_PHYSIFNAME] = { };
+  private:
+	char _ifname[ZT_MAX_PHYSIFNAME] = {};
 
 	volatile int64_t _lastOut;
 	volatile int64_t _lastIn;
@@ -375,6 +463,7 @@ private:
 
 	int64_t _lastEchoRequestReceived;
 
+	uint16_t _localPort;
 	int64_t _localSocket;
 
 	volatile float _latencyMean;
@@ -391,10 +480,10 @@ private:
 
 	volatile unsigned int _latency;
 	InetAddress _addr;
-	InetAddress::IpScope _ipScope; // memoize this since it's a computed value checked often
+	InetAddress::IpScope _ipScope;	 // memoize this since it's a computed value checked often
 	AtomicCounter __refCount;
 };
 
-} // namespace ZeroTier
+}	// namespace ZeroTier
 
 #endif

@@ -1,3 +1,11 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
+ */
+
 #include "MacDNSHelper.hpp"
 
 #include <stdio.h>
@@ -45,7 +53,7 @@ void MacDNSHelper::setDNS(uint64_t nwid, const char *domain, const std::vector<I
         &kCFTypeDictionaryValueCallBacks);
 
     char buf[256] = {0};
-    sprintf(buf, "State:/Network/Service/%.16llx/DNS", nwid);
+    snprintf(buf, sizeof(buf), "State:/Network/Service/%.16llx/DNS", nwid);
     CFStringRef key = CFStringCreateWithCString(NULL, buf, kCFStringEncodingUTF8);
     CFArrayRef list = SCDynamicStoreCopyKeyList(ds, key);
     CFIndex i = 0, j = CFArrayGetCount(list);
@@ -89,7 +97,7 @@ void MacDNSHelper::removeDNS(uint64_t nwid)
     SCDynamicStoreRef ds = SCDynamicStoreCreate(NULL, CFSTR("zerotier"), NULL, NULL);
 
     char buf[256] = {0};
-    sprintf(buf, "State:/Network/Service/%.16llx/DNS", nwid);
+    snprintf(buf, sizeof(buf), "State:/Network/Service/%.16llx/DNS", nwid);
     CFStringRef key = CFStringCreateWithCString(NULL, buf, kCFStringEncodingUTF8);
     SCDynamicStoreRemoveValue(ds, key);
     CFRelease(key);
@@ -128,7 +136,7 @@ bool MacDNSHelper::addIps4(uint64_t nwid, const MAC mac, const char *dev, const 
 
     SCDynamicStoreRef ds = SCDynamicStoreCreate(NULL, CFSTR("zerotier"), NULL, NULL);
     char buf[256] = { 0 };
-    sprintf(buf, "State:/Network/Service/%.16llx/IPv4", nwid);
+    snprintf(buf, sizeof(buf), "State:/Network/Service/%.16llx/IPv4", nwid);
 
 
     CFStringRef key = CFStringCreateWithCString(NULL, buf, kCFStringEncodingUTF8);
@@ -224,7 +232,7 @@ bool MacDNSHelper::addIps6(uint64_t nwid, const MAC mac, const char *dev, const 
 
     SCDynamicStoreRef ds = SCDynamicStoreCreate(NULL, CFSTR("zerotier"), NULL, NULL);
     char buf[256] = { 0 };
-    sprintf(buf, "State:/Network/Service/%.16llx/IPv6", nwid);
+    snprintf(buf, sizeof(buf), "State:/Network/Service/%.16llx/IPv6", nwid);
 
     InetAddress ll = InetAddress::makeIpv6LinkLocal(mac);
     char buf2[256] = {0};
@@ -319,7 +327,7 @@ bool MacDNSHelper::removeIps6(uint64_t nwid)
     SCDynamicStoreRef ds = SCDynamicStoreCreate(NULL, CFSTR("zerotier"), NULL, NULL);
 
     char buf[256] = {0};
-    sprintf(buf, "State:/Network/Service/%.16llx/IPv6", nwid);
+    snprintf(buf, sizeof(buf), "State:/Network/Service/%.16llx/IPv6", nwid);
     CFStringRef key = CFStringCreateWithCString(NULL, buf, kCFStringEncodingUTF8);
     bool res = SCDynamicStoreRemoveValue(ds, key);
     CFRelease(key);
@@ -334,7 +342,7 @@ bool MacDNSHelper::removeIps4(uint64_t nwid)
     SCDynamicStoreRef ds = SCDynamicStoreCreate(NULL, CFSTR("zerotier"), NULL, NULL);
 
     char buf[256] = {0};
-    sprintf(buf, "State:/Network/Service/%.16llx/IPv4", nwid);
+    snprintf(buf, sizeof(buf), "State:/Network/Service/%.16llx/IPv4", nwid);
     CFStringRef key = CFStringCreateWithCString(NULL, buf, kCFStringEncodingUTF8);
     bool res = SCDynamicStoreRemoveValue(ds, key);
     CFRelease(key);

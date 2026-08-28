@@ -9,14 +9,30 @@ ifeq ($(origin CXX),default)
 	CXX:=$(shell if [ -e /opt/rh/devtoolset-8/root/usr/bin/g++ ]; then echo /opt/rh/devtoolset-8/root/usr/bin/g++; else echo $(CXX); fi)
 endif
 
-INCLUDES?=-Izeroidc/target -isystem ext -Iext/prometheus-cpp-lite-1.0/core/include -Iext-prometheus-cpp-lite-1.0/3rdparty/http-client-lite/include -Iext/prometheus-cpp-lite-1.0/simpleapi/include
+INCLUDES?=-Irustybits/target -isystem ext -Iext/prometheus-cpp-lite-1.0/core/include -Iext-prometheus-cpp-lite-1.0/3rdparty/http-client-lite/include -Iext/prometheus-cpp-lite-1.0/simpleapi/include
 DEFS?=
 LDLIBS?=
 DESTDIR?=
+EXTRA_DEPS?=
 
 include objects.mk
-ONE_OBJS+=osdep/LinuxEthernetTap.o
-ONE_OBJS+=osdep/LinuxNetLink.o
+
+ifeq ($(ZT_CONTROLLER),1)
+	ZT_NONFREE=1
+endif
+ifeq ($(ZT_NONFREE),1)
+	include objects-nonfree.mk
+	ONE_OBJS+=$(CONTROLLER_OBJS)
+	override DEFS += -DZT_NONFREE_CONTROLLER
+endif
+
+ifeq ($(ZT_EXTOSDEP),1)
+	ONE_OBJS+=osdep/ExtOsdep.o
+	override DEFS += -DZT_EXTOSDEP
+else
+	ONE_OBJS+=osdep/LinuxEthernetTap.o
+	ONE_OBJS+=osdep/LinuxNetLink.o
+endif
 
 # for central controller buildsk
 TIMESTAMP=$(shell date +"%Y%m%d%H%M")
@@ -50,7 +66,7 @@ ifeq ($(ZT_RULES_ENGINE_DEBUGGING),1)
 endif
 
 ifeq ($(ZT_DEBUG_TRACE),1)
-	DEFS+=-DZT_DEBUG_TRACE
+	override DEFS+=-DZT_DEBUG_TRACE
 endif
 
 # Build with address sanitization library for advanced debugging (clang)
@@ -61,7 +77,7 @@ ifeq ($(ZT_DEBUG),1)
 	override CFLAGS+=-Wall -Wno-deprecated -g -O -pthread $(INCLUDES) $(DEFS)
 	override CXXFLAGS+=-Wall -Wno-deprecated -g -O -std=c++17 -pthread $(INCLUDES) $(DEFS)
 	ZT_TRACE=1
-	RUSTFLAGS=
+	ZT_CARGO_FLAGS=
 	# The following line enables optimization for the crypto code, since
 	# C25519 in particular is almost UNUSABLE in -O0 even on a 3ghz box!
 node/Salsa20.o node/SHA512.o node/C25519.o node/Poly1305.o: CXXFLAGS=-Wall -O2 -g -pthread $(INCLUDES) $(DEFS)
@@ -70,8 +86,8 @@ else
 	override CFLAGS+=-Wall -Wno-deprecated -pthread $(INCLUDES) -DNDEBUG $(DEFS)
 	CXXFLAGS?=-O3 -fstack-protector
 	override CXXFLAGS+=-Wall -Wno-deprecated -std=c++17 -pthread $(INCLUDES) -DNDEBUG $(DEFS)
-	LDFLAGS=-pie -Wl,-z,relro,-z,now
-	RUSTFLAGS=--release
+	LDFLAGS?=-pie -Wl,-z,relro,-z,now
+	ZT_CARGO_FLAGS=--release
 endif
 
 ifeq ($(ZT_QNAP), 1)
@@ -86,10 +102,6 @@ endif
 ifeq ($(ZT_SYNOLOGY), 1)
 	override DEFS+=-D__SYNOLOGY__
 	ZT_EMBEDDED=1
-endif
-
-ifeq ($(ZT_DISABLE_COMPRESSION), 1)
-	override DEFS+=-DZT_DISABLE_COMPRESSION
 endif
 
 ifeq ($(ZT_TRACE),1)
@@ -109,7 +121,7 @@ ifeq ($(ZT_VAULT_SUPPORT),1)
 	override LDLIBS+=-lcurl
 endif
 
-# Determine system build architecture from compiler target
+# Determine system build architecture from compiler target. This is hairy due to "ARM wrestling."
 CC_MACH=$(shell $(CC) -dumpmachine | cut -d '-' -f 1)
 ZT_ARCHITECTURE=999
 ifeq ($(CC_MACH),x86_64)
@@ -274,6 +286,10 @@ ifeq ($(CC_MACH),loongarch64)
 	override DEFS+=-DZT_NO_TYPE_PUNNING
 endif
 
+ifeq ($(ZT_EXTOSDEP), 1)
+	ZT_SSO_SUPPORTED=0
+endif
+
 # Fail if system architecture could not be determined
 ifeq ($(ZT_ARCHITECTURE),999)
 ERR=$(error FATAL: architecture could not be determined from $(CC) -dumpmachine: $(CC_MACH))
@@ -295,11 +311,22 @@ ifeq ($(ZT_SSO_SUPPORTED), 1)
 	ifeq ($(ZT_EMBEDDED),)
 		override DEFS+=-DZT_SSO_SUPPORTED=1
 		ifeq ($(ZT_DEBUG),1)
-			LDLIBS+=zeroidc/target/debug/libzeroidc.a -ldl -lssl -lcrypto
+			LDLIBS+=rustybits/target/debug/libzeroidc.a -ldl -lssl -lcrypto
 		else
-			LDLIBS+=zeroidc/target/release/libzeroidc.a -ldl -lssl -lcrypto
+			LDLIBS+=rustybits/target/release/libzeroidc.a -ldl -lssl -lcrypto
 		endif
 	endif
+endif
+
+OTEL_VERSION=1.21.0
+ifeq (${ZT_OTEL},1)
+	OTEL_INSTALL_DIR=ext/opentelemetry-cpp-${OTEL_VERSION}/localinstall
+	override DEFS+=-DZT_OPENTELEMETRY_ENABLED=1
+	INCLUDES+=-I${OTEL_INSTALL_DIR}/include
+	LDLIBS+=-L${OTEL_INSTALL_DIR}/lib -lopentelemetry_exporter_in_memory_metric -lopentelemetry_exporter_in_memory -lopentelemetry_exporter_ostream_logs -lopentelemetry_exporter_ostream_metrics -lopentelemetry_exporter_ostream_span -lopentelemetry_exporter_otlp_grpc  -lopentelemetry_exporter_otlp_grpc_client -lopentelemetry_exporter_otlp_grpc_log -lopentelemetry_exporter_otlp_grpc_metrics -lopentelemetry_otlp_recordable -lopentelemetry_common -lopentelemetry_trace -lopentelemetry_common -lopentelemetry_resources -lopentelemetry_logs -lopentelemetry_metrics -lopentelemetry_proto -lopentelemetry_proto_grpc -lopentelemetry_version -lprotobuf -lgrpc++
+else
+	OTEL_INSTALL_DIR=ext/opentelemetry-cpp-api-only
+	INCLUDES+=-I${OTEL_INSTALL_DIR}/include
 endif
 
 # Disable software updates by default on Linux since that is normally done with package management
@@ -314,16 +341,21 @@ ifeq ($(ZT_STATIC),1)
 endif
 
 # For building an official semi-static binary on CentOS 7
-ifeq ($(ZT_OFFICIAL),1)
-	CORE_OBJS+=ext/misc/linux-old-glibc-compat.o
-	override LDFLAGS+=-Wl,--wrap=memcpy -static-libstdc++
-endif
+#ifeq ($(ZT_OFFICIAL),1)
+#	CORE_OBJS+=ext/misc/linux-old-glibc-compat.o
+#	override LDFLAGS+=-Wl,--wrap=memcpy -static-libstdc++
+#endif
 
 ifeq ($(ZT_CONTROLLER),1)
 	override CXXFLAGS+=-Wall -Wno-deprecated -std=c++17 -pthread $(INCLUDES) -DNDEBUG $(DEFS)
 	override LDLIBS+=-Lext/libpqxx-7.7.3/install/ubuntu22.04/$(EXT_ARCH)/lib -lpqxx -lpq ext/hiredis-1.0.2/lib/ubuntu22.04/$(EXT_ARCH)/libhiredis.a ext/redis-plus-plus-1.3.3/install/ubuntu22.04/$(EXT_ARCH)/lib/libredis++.a -lssl -lcrypto
-	override DEFS+=-DZT_CONTROLLER_USE_LIBPQ -DZT_NO_PEER_METRICS
+	override DEFS+=-DZT_CONTROLLER_USE_LIBPQ -DZT_NO_PEER_METRICS -DZT_OPENTELEMETRY_ENABLED
 	override INCLUDES+=-I/usr/include/postgresql -Iext/libpqxx-7.7.3/install/ubuntu22.04/$(EXT_ARCH)/include -Iext/hiredis-1.0.2/include/ -Iext/redis-plus-plus-1.3.3/install/ubuntu22.04/$(EXT_ARCH)/include/sw/
+	ifeq ($(ZT_DEBUG),1)
+		override LDLIBS+=rustybits/target/debug/libsmeeclient.a
+	else
+		override LDLIBS+=rustybits/target/release/libsmeeclient.a
+	endif
 endif
 
 # ARM32 hell -- use conservative CFLAGS
@@ -333,8 +365,12 @@ ifeq ($(ZT_ARCHITECTURE),3)
 		override CXXFLAGS+=-march=armv5t -mfloat-abi=soft -msoft-float -mno-unaligned-access -marm
 		ZT_USE_ARM32_NEON_ASM_CRYPTO=0
 	else
-		override CFLAGS+=-mfloat-abi=hard -march=armv6zk -marm -mfpu=vfp -mno-unaligned-access -mtp=cp15 -mcpu=arm1176jzf-s
-		override CXXFLAGS+=-mfloat-abi=hard -march=armv6zk -marm -mfpu=vfp -fexceptions -mno-unaligned-access -mtp=cp15 -mcpu=arm1176jzf-s
+		ifeq ($(ZT_EXTOSDEP), 0)
+			override CFLAGS+=-mfloat-abi=hard -march=armv6zk -marm -mfpu=vfp -mno-unaligned-access -mtp=cp15 -mcpu=arm1176jzf-s
+			override CXXFLAGS+=-mfloat-abi=hard -march=armv6zk -marm -mfpu=vfp -fexceptions -mno-unaligned-access -mtp=cp15 -mcpu=arm1176jzf-s
+		else
+			override DEFS+=-DZT_NO_PEER_METRICS
+		endif
 		ZT_USE_ARM32_NEON_ASM_CRYPTO=0
 	endif
 endif
@@ -358,19 +394,19 @@ override CFLAGS+=-fPIC -fPIE
 override CXXFLAGS+=-fPIC -fPIE
 
 # Non-executable stack
-override ASFLAGS+=--noexecstack
+override LDFLAGS+=-Wl,-z,noexecstack
 
 .PHONY: all
 all:	one
 
 .PHONY: one
-one: zerotier-one zerotier-idtool zerotier-cli
+one: otel zerotier-one zerotier-idtool zerotier-cli
 
 from_builder:	FORCE
 	ln -sf zerotier-one zerotier-idtool
 	ln -sf zerotier-one zerotier-cli
 
-zerotier-one:	$(CORE_OBJS) $(ONE_OBJS) one.o
+zerotier-one: $(CORE_OBJS) $(ONE_OBJS) one.o ext/${OTEL_INSTALL_DIR}/include/opentelemetry/version.h
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o zerotier-one $(CORE_OBJS) $(ONE_OBJS) one.o $(LDLIBS)
 
 zerotier-idtool: zerotier-one
@@ -379,7 +415,7 @@ zerotier-idtool: zerotier-one
 zerotier-cli: zerotier-one
 	ln -sf zerotier-one zerotier-cli
 
-$(ONE_OBJS): zeroidc
+$(ONE_OBJS): zeroidc smeeclient
 
 libzerotiercore.a:	FORCE
 	make CFLAGS="-O3 -fstack-protector -fPIC" CXXFLAGS="-O3 -std=c++17 -fstack-protector -fPIC" $(CORE_OBJS)
@@ -398,15 +434,26 @@ manpages:	FORCE
 
 doc:	manpages
 
+ifeq (${ZT_OTEL},1)
+otel:
+	cd ext/opentelemetry-cpp-1.21.0 && mkdir -p localinstall && cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(shell pwd)/ext/opentelemetry-cpp-1.21.0/localinstall -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_TESTING=OFF -DOPENTELEMETRY_INSTALL=ON -DWITH_BENCHMARK=OFF -DWITH_EXAMPLES=OFF -DWITH_FUNC_TESTS=OFF -DUSE_THIRDPARTY_LIBRARIES=ON -DWITH_OTLP_GRPC=ON -DWITH_OTLP_HTTP=OFF -DWITH_PROMETHEUS=OFF
+	cd ext/opentelemetry-cpp-1.21.0/build && make -j4 install
+else
+otel:
+	@echo "OpenTelemetry exporter not enabled, skipping build."
+endif
+
+ext/${OTEL_INSTALL_DIR}/include/opentelemetry/version.h: otel
+
 clean: FORCE
-	rm -rf *.a *.so *.o node/*.o controller/*.o osdep/*.o service/*.o ext/http-parser/*.o ext/miniupnpc/*.o ext/libnatpmp/*.o $(CORE_OBJS) $(ONE_OBJS) zerotier-one zerotier-idtool zerotier-cli zerotier-selftest build-* ZeroTierOneInstaller-* *.deb *.rpm .depend debian/files debian/zerotier-one*.debhelper debian/zerotier-one.substvars debian/*.log debian/zerotier-one doc/node_modules ext/misc/*.o debian/.debhelper debian/debhelper-build-stamp docker/zerotier-one zeroidc/target
+	rm -rf *.a *.so *.o node/*.o nonfree/controller/*.o osdep/*.o service/*.o ext/http-parser/*.o ext/miniupnpc/*.o ext/libnatpmp/*.o $(CORE_OBJS) $(ONE_OBJS) zerotier-one zerotier-idtool zerotier-cli zerotier-selftest build-* ZeroTierOneInstaller-* *.deb *.rpm .depend debian/files debian/zerotier-one*.debhelper debian/zerotier-one.substvars debian/*.log debian/zerotier-one doc/node_modules ext/misc/*.o debian/.debhelper debian/debhelper-build-stamp docker/zerotier-one rustybits/target ext/opentelemetry-cpp-${OTEL_VERSION}/localinstall ext/opentelemetry-cpp-${OTEL_VERSION}/build
 
 distclean:	clean
 
 realclean:	distclean
 
 official:	FORCE
-	make -j`nproc` ZT_OFFICIAL=1 all
+	make -j`nproc` ZT_OFFICIAL=1 ZT_NONFREE=1 all
 
 docker:	FORCE
 	docker build --no-cache -f ext/installfiles/linux/zerotier-containerized/Dockerfile -t zerotier-containerized .
@@ -419,7 +466,7 @@ _buildx:
 	@echo docker buildx inspect --bootstrap
 
 central-controller:	FORCE
-	make -j4 ZT_CONTROLLER=1 one
+	make ZT_OTEL=1 otel && ZT_OTEL=1 make -j4 ZT_CONTROLLER=1  one
 
 central-controller-docker: _buildx FORCE
 	docker buildx build --platform linux/amd64,linux/arm64 --no-cache -t registry.zerotier.com/zerotier-central/ztcentral-controller:${TIMESTAMP} -f ext/central-controller-docker/Dockerfile --build-arg git_branch=`git name-rev --name-only HEAD` . --push
@@ -432,11 +479,17 @@ debug:	FORCE
 ifeq ($(ZT_SSO_SUPPORTED), 1)
 ifeq ($(ZT_EMBEDDED),)
 zeroidc:	FORCE
-#	export PATH=/root/.cargo/bin:$$PATH; cd zeroidc && cargo build -j1 $(RUSTFLAGS)
-	export PATH=/${HOME}/.cargo/bin:$$PATH; cd zeroidc && cargo build $(RUSTFLAGS)
+	export PATH=/${HOME}/.cargo/bin:$$PATH; cd rustybits && cargo build $(ZT_CARGO_FLAGS) -p zeroidc
 endif
 else
 zeroidc:
+endif
+
+ifeq ($(ZT_CONTROLLER), 1)
+smeeclient:	FORCE
+	export PATH=/${HOME}/.cargo/bin:$$PATH; cd rustybits && cargo build $(ZT_CARGO_FLAGS) -p smeeclient
+else
+smeeclient:
 endif
 
 # Note: keep the symlinks in /var/lib/zerotier-one to the binaries since these

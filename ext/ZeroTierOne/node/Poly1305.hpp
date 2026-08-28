@@ -1,15 +1,10 @@
-/*
- * Copyright (c)2019 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_POLY1305_HPP
 #define ZT_POLY1305_HPP
@@ -30,9 +25,8 @@ namespace ZeroTier {
  * keystream as a one-time-use key. These 32 bytes are then discarded and
  * the packet is encrypted with the next N bytes.
  */
-class Poly1305
-{
-public:
+class Poly1305 {
+  public:
 	/**
 	 * Compute a one-time authentication code
 	 *
@@ -41,9 +35,9 @@ public:
 	 * @param len Length of data to authenticate in bytes
 	 * @param key 32-byte one-time use key to authenticate data (must not be reused)
 	 */
-	static void compute(void *auth,const void *data,unsigned int len,const void *key);
+	static void compute(void* auth, const void* data, unsigned int len, const void* key);
 };
 
-} // namespace ZeroTier
+}	// namespace ZeroTier
 
 #endif

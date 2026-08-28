@@ -935,6 +935,14 @@ typedef struct {
 #define ZTS_MAX_NUM_ROOTS          16
 #define ZTS_MAX_ENDPOINTS_PER_ROOT 32
 
+/** Size of a signing keypair (public set + private set) written by
+ * zts_util_sign_root_set() */
+#define ZTS_SIGNING_KEYPAIR_LEN 128
+
+/** Buffer size always sufficient to hold a root set from
+ * zts_util_sign_root_set(). Mirrors ZT_WORLD_MAX_SERIALIZED_LENGTH. */
+#define ZTS_ROOT_SET_BUF_LEN 8480
+
 /**
  * Structure used to specify a root topology (aka a world)
  */
@@ -1026,7 +1034,9 @@ typedef struct {
 // Central API                                                                //
 //----------------------------------------------------------------------------//
 
-#define ZTS_DISABLE_CENTRAL_API 1
+// ZTS_DISABLE_CENTRAL_API is owned by the build system (see CMakeLists.txt). It used
+// to be #defined unconditionally right here, which made the block below permanently
+// dead and impossible to re-enable from the build. See issue #121.
 
 #ifndef ZTS_DISABLE_CENTRAL_API
 

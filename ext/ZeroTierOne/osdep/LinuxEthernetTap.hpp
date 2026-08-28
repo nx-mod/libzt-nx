@@ -1,68 +1,65 @@
-/*
- * Copyright (c)2019 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_LINUXETHERNETTAP_HPP
 #define ZT_LINUXETHERNETTAP_HPP
 
+#include "../node/MulticastGroup.hpp"
+#include "BlockingQueue.hpp"
+#include "EthernetTap.hpp"
+
+#include <array>
+#include <atomic>
+#include <mutex>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <string>
-#include <vector>
-#include <stdexcept>
-#include <atomic>
-#include <array>
 #include <thread>
-#include <mutex>
-#include "../node/MulticastGroup.hpp"
-#include "EthernetTap.hpp"
+#include <vector>
 
 namespace ZeroTier {
 
-class LinuxEthernetTap : public EthernetTap
-{
-public:
+class LinuxEthernetTap : public EthernetTap {
+  public:
 	LinuxEthernetTap(
-		const char *homePath,
-		const MAC &mac,
+		const char* homePath,
+		unsigned int concurrency,
+		bool pinning,
+		const MAC& mac,
 		unsigned int mtu,
 		unsigned int metric,
 		uint64_t nwid,
-		const char *friendlyName,
-		void (*handler)(void *,void *,uint64_t,const MAC &,const MAC &,unsigned int,unsigned int,const void *,unsigned int),
-		void *arg);
+		const char* friendlyName,
+		void (*handler)(void*, void*, uint64_t, const MAC&, const MAC&, unsigned int, unsigned int, const void*, unsigned int),
+		void* arg);
 
 	virtual ~LinuxEthernetTap();
 
 	virtual void setEnabled(bool en);
 	virtual bool enabled() const;
-	virtual bool addIp(const InetAddress &ip);
+	virtual bool addIp(const InetAddress& ip);
 	virtual bool addIps(std::vector<InetAddress> ips);
-	virtual bool removeIp(const InetAddress &ip);
+	virtual bool removeIp(const InetAddress& ip);
 	virtual std::vector<InetAddress> ips() const;
-	virtual void put(const MAC &from,const MAC &to,unsigned int etherType,const void *data,unsigned int len);
+	virtual void put(const MAC& from, const MAC& to, unsigned int etherType, const void* data, unsigned int len);
 	virtual std::string deviceName() const;
-	virtual void setFriendlyName(const char *friendlyName);
-	virtual void scanMulticastGroups(std::vector<MulticastGroup> &added,std::vector<MulticastGroup> &removed);
+	virtual void setFriendlyName(const char* friendlyName);
+	virtual void scanMulticastGroups(std::vector<MulticastGroup>& added, std::vector<MulticastGroup>& removed);
 	virtual void setMtu(unsigned int mtu);
-	virtual void setDns(const char *domain, const std::vector<InetAddress> &servers) {}
+	virtual void setDns(const char* domain, const std::vector<InetAddress>& servers)
+	{
+		fprintf(stderr, "WARNING: ignoring call to LinuxEthernetTap::setDns on Linux. This is not implemented yet. See https://github.com/zerotier/ZeroTierOne/issues/2492 for details" ZT_EOL_S);
+	}
 
-
-
-
-private:
-	void (*_handler)(void *,void *,uint64_t,const MAC &,const MAC &,unsigned int,unsigned int,const void *,unsigned int);
-	void *_arg;
+  private:
+	void (*_handler)(void*, void*, uint64_t, const MAC&, const MAC&, unsigned int, unsigned int, const void*, unsigned int);
+	void* _arg;
 	uint64_t _nwid;
 	MAC _mac;
 	std::string _homePath;
@@ -73,11 +70,11 @@ private:
 	int _shutdownSignalPipe[2];
 	std::atomic_bool _enabled;
 	std::atomic_bool _run;
-	std::thread _tapReaderThread;
 	mutable std::vector<InetAddress> _ifaddrs;
 	mutable uint64_t _lastIfAddrsUpdate;
+	std::vector<std::thread> _rxThreads;
 };
 
-} // namespace ZeroTier
+}	// namespace ZeroTier
 
 #endif

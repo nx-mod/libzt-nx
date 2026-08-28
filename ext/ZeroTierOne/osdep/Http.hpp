@@ -1,34 +1,31 @@
-/*
- * Copyright (c)2019 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef ZT_HTTP_HPP
 #define ZT_HTTP_HPP
 
-#include <string>
 #include <map>
 #include <stdexcept>
+#include <string>
 
 #if defined(_WIN32) || defined(_WIN64)
+// clang-format off
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+// clang-format on
 #else
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 namespace ZeroTier {
@@ -36,9 +33,8 @@ namespace ZeroTier {
 /**
  * Simple synchronous HTTP client used for updater and cli
  */
-class Http
-{
-public:
+class Http {
+  public:
 	/**
 	 * Make HTTP GET request
 	 *
@@ -46,26 +42,16 @@ public:
 	 *
 	 * @return HTTP status code or 0 on error (responseBody will contain error message)
 	 */
-	static inline unsigned int GET(
-		unsigned long maxResponseSize,
+	static inline unsigned int
+	GET(unsigned long maxResponseSize,
 		unsigned long timeout,
-		const struct sockaddr *remoteAddress,
-		const char *path,
-		const std::map<std::string,std::string> &requestHeaders,
-		std::map<std::string,std::string> &responseHeaders,
-		std::string &responseBody)
+		const struct sockaddr* remoteAddress,
+		const char* path,
+		const std::map<std::string, std::string>& requestHeaders,
+		std::map<std::string, std::string>& responseHeaders,
+		std::string& responseBody)
 	{
-		return _do(
-			"GET",
-			maxResponseSize,
-			timeout,
-			remoteAddress,
-			path,
-			requestHeaders,
-			(const void *)0,
-			0,
-			responseHeaders,
-			responseBody);
+		return _do("GET", maxResponseSize, timeout, remoteAddress, path, requestHeaders, (const void*)0, 0, responseHeaders, responseBody);
 	}
 
 	/**
@@ -75,26 +61,16 @@ public:
 	 *
 	 * @return HTTP status code or 0 on error (responseBody will contain error message)
 	 */
-	static inline unsigned int DEL(
-		unsigned long maxResponseSize,
+	static inline unsigned int
+	DEL(unsigned long maxResponseSize,
 		unsigned long timeout,
-		const struct sockaddr *remoteAddress,
-		const char *path,
-		const std::map<std::string,std::string> &requestHeaders,
-		std::map<std::string,std::string> &responseHeaders,
-		std::string &responseBody)
+		const struct sockaddr* remoteAddress,
+		const char* path,
+		const std::map<std::string, std::string>& requestHeaders,
+		std::map<std::string, std::string>& responseHeaders,
+		std::string& responseBody)
 	{
-		return _do(
-			"DELETE",
-			maxResponseSize,
-			timeout,
-			remoteAddress,
-			path,
-			requestHeaders,
-			(const void *)0,
-			0,
-			responseHeaders,
-			responseBody);
+		return _do("DELETE", maxResponseSize, timeout, remoteAddress, path, requestHeaders, (const void*)0, 0, responseHeaders, responseBody);
 	}
 
 	/**
@@ -109,25 +85,15 @@ public:
 	static inline unsigned int POST(
 		unsigned long maxResponseSize,
 		unsigned long timeout,
-		const struct sockaddr *remoteAddress,
-		const char *path,
-		const std::map<std::string,std::string> &requestHeaders,
-		const void *postData,
+		const struct sockaddr* remoteAddress,
+		const char* path,
+		const std::map<std::string, std::string>& requestHeaders,
+		const void* postData,
 		unsigned long postDataLength,
-		std::map<std::string,std::string> &responseHeaders,
-		std::string &responseBody)
+		std::map<std::string, std::string>& responseHeaders,
+		std::string& responseBody)
 	{
-		return _do(
-			"POST",
-			maxResponseSize,
-			timeout,
-			remoteAddress,
-			path,
-			requestHeaders,
-			postData,
-			postDataLength,
-			responseHeaders,
-			responseBody);
+		return _do("POST", maxResponseSize, timeout, remoteAddress, path, requestHeaders, postData, postDataLength, responseHeaders, responseBody);
 	}
 
 	/**
@@ -139,44 +105,34 @@ public:
 	 *
 	 * @return HTTP status code or 0 on error (responseBody will contain error message)
 	 */
-	static inline unsigned int PUT(
-		unsigned long maxResponseSize,
+	static inline unsigned int
+	PUT(unsigned long maxResponseSize,
 		unsigned long timeout,
-		const struct sockaddr *remoteAddress,
-		const char *path,
-		const std::map<std::string,std::string> &requestHeaders,
-		const void *postData,
+		const struct sockaddr* remoteAddress,
+		const char* path,
+		const std::map<std::string, std::string>& requestHeaders,
+		const void* postData,
 		unsigned long postDataLength,
-		std::map<std::string,std::string> &responseHeaders,
-		std::string &responseBody)
+		std::map<std::string, std::string>& responseHeaders,
+		std::string& responseBody)
 	{
-		return _do(
-			"PUT",
-			maxResponseSize,
-			timeout,
-			remoteAddress,
-			path,
-			requestHeaders,
-			postData,
-			postDataLength,
-			responseHeaders,
-			responseBody);
+		return _do("PUT", maxResponseSize, timeout, remoteAddress, path, requestHeaders, postData, postDataLength, responseHeaders, responseBody);
 	}
 
-private:
-	static unsigned int _do(
-		const char *method,
+  private:
+	static unsigned int
+	_do(const char* method,
 		unsigned long maxResponseSize,
 		unsigned long timeout,
-		const struct sockaddr *remoteAddress,
-		const char *path,
-		const std::map<std::string,std::string> &requestHeaders,
-		const void *requestBody,
+		const struct sockaddr* remoteAddress,
+		const char* path,
+		const std::map<std::string, std::string>& requestHeaders,
+		const void* requestBody,
 		unsigned long requestBodyLength,
-		std::map<std::string,std::string> &responseHeaders,
-		std::string &responseBody);
+		std::map<std::string, std::string>& responseHeaders,
+		std::string& responseBody);
 };
 
-} // namespace ZeroTier
+}	// namespace ZeroTier
 
 #endif

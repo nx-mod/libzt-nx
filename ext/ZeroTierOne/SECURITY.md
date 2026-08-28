@@ -1,17 +1,18 @@
 # Security
 
-ZeroTier takes the security of our software products and services seriously, which 
+ZeroTier takes the security of our software products and services seriously, which
 includes all source code repositories managed through our GitHub organization.
 
 ## Supported Versions
 
 The following versions of ZeroTier One receive security updates
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.10.x   | :white_check_mark: |
-| 1.8.x   | :white_check_mark:  |
-| < 1.8.0 | :x: |
+| Version  | Supported          |
+| -------- | ------------------ |
+| 1.16.x   | :white_check_mark: |
+| 1.14.x   | :white_check_mark: |
+| 1.12.x   | :x:                |
+| < 1.12.0 | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -20,9 +21,8 @@ The following versions of ZeroTier One receive security updates
 Instead, please report vulnerabilities via email to security@zerotier.com. If possible,
 please encrypt with our PGP key (see below).
 
-Please include the following information, or as much as you can provide to help us 
+Please include the following information, or as much as you can provide to help us
 understand the nature and scope of the issue:
-
 
   * Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
   * Full paths of source file(s) related to the manifestation of the issue
@@ -31,7 +31,6 @@ understand the nature and scope of the issue:
   * Step-by-step instructions to reproduce the issue
   * Proof-of-concept or exploit code (if possible)
   * Impact of the issue, including how an attacker might exploit the issue
-
 
 ## Preferred Languages
 

@@ -1,15 +1,10 @@
-/*
- * Copyright (c)2019 ZeroTier, Inc.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  *
- * Use of this software is governed by the Business Source License included
- * in the LICENSE.TXT file in the project's root directory.
- *
- * Change Date: 2025-01-01
- *
- * On the date above, in accordance with the Business Source License, use
- * of this software will be governed by version 2.0 of the Apache License.
+ * (c) ZeroTier, Inc.
+ * https://www.zerotier.com/
  */
-/****/
 
 #ifndef _ZT_VERSION_H
 #define _ZT_VERSION_H
@@ -22,12 +17,12 @@
 /**
  * Minor version
  */
-#define ZEROTIER_ONE_VERSION_MINOR 12
+#define ZEROTIER_ONE_VERSION_MINOR 16
 
 /**
  * Revision
  */
-#define ZEROTIER_ONE_VERSION_REVISION 0
+#define ZEROTIER_ONE_VERSION_REVISION 2
 
 /**
  * Build version
@@ -44,5 +39,10 @@
 #ifndef ZT_BUILD_PLATFORM
 #define ZT_BUILD_PLATFORM 0
 #endif
+
+#define _ZT_STR_HELPER(x)		 #x
+#define _ZT_STR(x)				 _ZT_STR_HELPER(x)
+#define ZEROTIER_ONE_VERSION_STR _ZT_STR(ZEROTIER_ONE_VERSION_MAJOR) "." _ZT_STR(ZEROTIER_ONE_VERSION_MINOR) "." _ZT_STR(ZEROTIER_ONE_VERSION_REVISION)
+#define ZEROTIER_ONE_NAME		 "zerotier-one"
 
 #endif

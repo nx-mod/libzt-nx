@@ -1,9 +1,9 @@
 Name:           zerotier-one
-Version:        1.10.6
+Version:        1.16.2
 Release:        1%{?dist}
 Summary:        ZeroTier network virtualization service
 
-License:        ZeroTier BSL 1.1
+License:        MPL 2.0
 URL:            https://www.zerotier.com
 
 # Fedora
@@ -15,20 +15,32 @@ Requires(pre): /usr/sbin/useradd, /usr/bin/getent
 %endif
 
 %if "%{?dist}" == ".fc36"
-BuildRequires: systemd clang openssl1.1 openssl1.1-devel
-Requires:      systemd openssl1.1
+BuildRequires: systemd clang openssl openssl-devel
+Requires:      systemd openssl
 Requires(pre): /usr/sbin/useradd, /usr/bin/getent
 %endif
 
 %if "%{?dist}" == ".fc37"
-BuildRequires: systemd clang openssl1.1 openssl1.1-devel
-Requires:      systemd openssl1.1
+BuildRequires: systemd clang openssl openssl-devel
+Requires:      systemd openssl
 Requires(pre): /usr/sbin/useradd, /usr/bin/getent
 %endif
 
 %if "%{?dist}" == ".fc38"
-BuildRequires: systemd clang openssl1.1 openssl1.1-devel
-Requires:      systemd openssl1.1
+BuildRequires: systemd clang openssl openssl-devel
+Requires:      systemd openssl
+Requires(pre): /usr/sbin/useradd, /usr/bin/getent
+%endif
+
+%if "%{?dist}" == ".fc39"
+BuildRequires: systemd clang openssl openssl-devel
+Requires:      systemd openssl
+Requires(pre): /usr/sbin/useradd, /usr/bin/getent
+%endif
+
+%if "%{?dist}" == ".fc40"
+BuildRequires: systemd clang openssl openssl-devel
+Requires:      systemd openssl
 Requires(pre): /usr/sbin/useradd, /usr/bin/getent
 %endif
 
@@ -90,12 +102,12 @@ ln -s %{getenv:PWD} %{name}-%{version}
 mkdir -p SOURCES
 tar --exclude=%{name}-%{version}/.git --exclude=%{name}-%{version}/%{name}-%{version} -czf SOURCES/%{name}-%{version}.tar.gz %{name}-%{version}/*
 rm -f %{name}-%{version}
-# cp -a %{getenv:PWD}/* .
+cp -a %{getenv:PWD}/* .
 %endif
 
 %build
 %if "%{?dist}" != ".el6"
-make ZT_USE_MINIUPNPC=1 %{?_smp_mflags} one
+make ZT_USE_MINIUPNPC=1 %{?_smp_mflags} ZT_OFFICIAL=1 ZT_NONFREE=1 one
 %endif
 
 %pre
@@ -143,6 +155,27 @@ chmod 0755 $RPM_BUILD_ROOT/etc/init.d/zerotier-one
 %endif
 
 %changelog
+* Wed May 27 2026 Adam Ierymenko <adam.ierymenko@zerotier.com> - 1.16.2
+- see https://github.com/zerotier/ZeroTierOne for release notes
+
+* Fri Dec 12 2025 Adam Ierymenko <adam.ierymenko@zerotier.com> - 1.16.1
+- see https://github.com/zerotier/ZeroTierOne for release notes
+
+* Wed Oct 23 2024 Adam Ierymenko <adam.ierymenko@zerotier.com> - 1.14.2
+- see https://github.com/zerotier/ZeroTierOne for release notes
+
+* Tue Mar 19 2024 Adam Ierymenko <adam.ierymenko@zerotier.com> - 1.14.0
+- see https://github.com/zerotier/ZeroTierOne for release notes
+
+* Tue Sep 12 2023 Adam Ierymenko <adam.ierymenko@zerotier.com> - 1.12.2
+- see https://github.com/zerotier/ZeroTierOne for release notes
+
+* Fri Aug 25 2023 Adam Ierymenko <adam.ierymenko@zerotier.com> - 1.12.1
+- see https://github.com/zerotier/ZeroTierOne for release notes
+
+* Thu Aug 17 2023 Adam Ierymenko <adam.ierymenko@zerotier.com> - 1.12.0
+- see https://github.com/zerotier/ZeroTierOne for release notes
+
 * Tue Mar 21 2023 Adam Ierymenko <adam.ierymenko@zerotier.com> - 1.10.6
 - see https://github.com/zerotier/ZeroTierOne for release notes
 

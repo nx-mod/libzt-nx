@@ -2,7 +2,7 @@ CORE_OBJS=\
 	node/AES.o \
 	node/AES_aesni.o \
 	node/AES_armcrypto.o \
-	node/C25519.o \
+	node/ECC.o \
 	node/Capability.o \
 	node/CertificateOfMembership.o \
 	node/CertificateOfOwnership.o \
@@ -29,19 +29,12 @@ CORE_OBJS=\
 	node/Topology.o \
 	node/Trace.o \
 	node/Utils.o \
-	node/Bond.o
+	node/Bond.o \
+	node/PacketMultiplexer.o \
+	osdep/OSUtils.o
 
 ONE_OBJS=\
-	controller/EmbeddedNetworkController.o \
-	controller/DBMirrorSet.o \
-	controller/DB.o \
-	controller/FileDB.o \
-	controller/LFDB.o \
-	controller/PostgreSQL.o \
 	osdep/EthernetTap.o \
 	osdep/ManagedRoute.o \
 	osdep/Http.o \
-	osdep/OSUtils.o \
-	service/SoftwareUpdater.o \
 	service/OneService.o
-
