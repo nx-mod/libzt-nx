@@ -239,3 +239,6 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Our own out-of-tree Switch build output
+build-switch/
