@@ -35,6 +35,9 @@
 
 #include "Events.hpp"
 #include "VirtualTap.hpp"
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
 
 #if defined(__WINDOWS__)
 #include "synchapi.h"
@@ -79,7 +82,7 @@ VirtualTap::VirtualTap(
     , _mac(mac)
     , _mtu(mtu)
     , _net_id(net_id)
-    , _phy(this, false, true)
+    , _phy(this, false, false)
 {
     OSUtils::ztsnprintf(vtap_full_name, VTAP_NAME_LEN, "libzt-vtap-%llx", _net_id);
 #ifndef __WINDOWS__
@@ -294,6 +297,10 @@ static void zts_tcpip_init_done(void* arg)
 
 static void zts_main_lwip_driver_loop(void* arg)
 {
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] DRIVER: ENTER\n");
+    consoleUpdate(NULL);
+#endif
 #if defined(__linux__)
     // pthread_setname_np(pthread_self(), ZTS_LWIP_THREAD_NAME);
 #endif
@@ -302,11 +309,35 @@ static void zts_main_lwip_driver_loop(void* arg)
 #endif
     sys_sem_t sem;
     LWIP_UNUSED_ARG(arg);
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] DRIVER: BEFORE_SEM_NEW\n");
+    consoleUpdate(NULL);
+#endif
     if (sys_sem_new(&sem, 0) != ERR_OK) {
         // DEBUG_ERROR("failed to create semaphore");
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] DRIVER: AFTER_SEM_NEW\n");
+    consoleUpdate(NULL);
+#endif
     }
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] DRIVER: BEFORE_TCPIP_INIT\n");
+    consoleUpdate(NULL);
+#endif
     tcpip_init(zts_tcpip_init_done, &sem);
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] DRIVER: AFTER_TCPIP_INIT\n");
+    consoleUpdate(NULL);
+#endif
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] DRIVER: BEFORE_SEM_WAIT\n");
+    consoleUpdate(NULL);
+#endif
     sys_sem_wait(&sem);
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] DRIVER: AFTER_SEM_WAIT\n");
+    consoleUpdate(NULL);
+#endif
     // Main loop
     while (zts_events->getState(ZTS_STATE_STACK_RUNNING)) {
         zts_util_delay(LWIP_DRIVER_LOOP_INTERVAL);
@@ -327,6 +358,10 @@ bool zts_lwip_is_up()
 
 void zts_lwip_driver_init()
 {
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] zts_lwip_driver_init entered\n");
+    consoleUpdate(NULL);
+#endif
     if (zts_lwip_is_up()) {
         return;
     }
@@ -337,12 +372,20 @@ void zts_lwip_driver_init()
 #if defined(__WINDOWS__)
     sys_init();   // Required for win32 init of critical sections
 #endif
-    sys_thread_new(
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] about to call sys_thread_new()\n");
+    consoleUpdate(NULL);
+#endif
+    sys_thread_t lwip_thread = sys_thread_new(
         ZTS_LWIP_THREAD_NAME,
         zts_main_lwip_driver_loop,
         NULL,
         DEFAULT_THREAD_STACKSIZE,
         DEFAULT_THREAD_PRIO);
+#ifdef __SWITCH__
+    printf("[SWITCH-DIAG] sys_thread_new returned: %s\n", lwip_thread ? "non-null" : "NULL");
+    consoleUpdate(NULL);
+#endif
 }
 
 void zts_lwip_driver_shutdown()

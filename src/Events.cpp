@@ -79,6 +79,12 @@ moodycamel::ConcurrentQueue<zts_event_msg_t*> _callbackMsgQueue;
 
 void Events::run()
 {
+    static int s_marker = 0;
+    if (__sync_bool_compare_and_swap(&s_marker, 0, 1)) {
+        fprintf(stderr, "[CB] callback thread running (proc interval %d ms)\n",
+                (int)ZTS_CALLBACK_PROCESSING_INTERVAL);
+        fflush(stderr);
+    }
     while (getState(ZTS_STATE_CALLBACKS_RUNNING) || _callbackMsgQueue.size_approx() > 0) {
         zts_event_msg_t* msg;
         size_t sz = _callbackMsgQueue.size_approx();

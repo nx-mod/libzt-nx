@@ -83,7 +83,11 @@
 ------------------------------------ Presets -----------------------------------
 ------------------------------------------------------------------------------*/
 
+#ifdef __SWITCH__
+#define LWIP_MTU                        1280
+#else
 #define LWIP_MTU                        2800
+#endif
 #define LWIP_CHKSUM_ALGORITHM           2
 // memory
 #define MEMP_NUM_NETCONN                1024

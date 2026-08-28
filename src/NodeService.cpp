@@ -166,7 +166,7 @@ static void StapFrameHandler(
 }
 
 NodeService::NodeService()
-    : _phy(this, false, true)
+    : _phy(this, false, false)
     , _node((Node*)0)
     , _nodeId(0x0)
     , _primaryPort()
@@ -853,13 +853,23 @@ int NodeService::nodeVirtualNetworkConfigFunction(
     Mutex::Lock _l(_nets_m);
     NetworkState& n = _nets[net_id];
 
+    // Switch hotfix: the controller pushes the default 2800 MTU
+    // (ZT_DEFAULT_MTU), which fragments badly over phone hotspots and can leave
+    // the node unable to establish a path (paths=0) and go OFFLINE. Clamp the
+    // effective network MTU here regardless of what the controller sends.
+    ZT_VirtualNetworkConfig cfg = (*nwc);
+    const uint32_t kSwitchMtu = 1280;
+    if (cfg.mtu > kSwitchMtu) {
+        cfg.mtu = kSwitchMtu;
+    }
+
     switch (op) {
         case ZT_VIRTUAL_NETWORK_CONFIG_OPERATION_UP:
             if (! n.tap) {
                 n.tap = new VirtualTap(
                     _homePath.c_str(),
-                    MAC(nwc->mac),
-                    nwc->mtu,
+                    MAC(cfg.mac),
+                    cfg.mtu,
                     (unsigned int)ZT_IF_METRIC,
                     net_id,
                     StapFrameHandler,
@@ -870,10 +880,10 @@ int NodeService::nodeVirtualNetworkConfigFunction(
             // After setting up tap, fall through to CONFIG_UPDATE since we
             // also want to do this...
         case ZT_VIRTUAL_NETWORK_CONFIG_OPERATION_CONFIG_UPDATE:
-            memcpy(&(n.config), nwc, sizeof(ZT_VirtualNetworkConfig));
+            memcpy(&(n.config), &cfg, sizeof(ZT_VirtualNetworkConfig));
             if (n.tap) {   // sanity check
                 syncManagedStuff(n);
-                n.tap->setMtu(nwc->mtu);
+                n.tap->setMtu(cfg.mtu);
             }
             else {
                 _nets.erase(net_id);
@@ -1056,9 +1066,28 @@ void NodeService::sendEventToUser(unsigned int zt_event_code, const void* obj, u
         case ZTS_EVENT_PEER_PATH_DEAD: {
             pr = new zts_peer_info_t();
             ZT_Peer* peer = (ZT_Peer*)obj;
-            memcpy(pr, peer, sizeof(zts_peer_info_t));
-            for (unsigned int j = 0; j < peer->pathCount; j++) {
+            // See scripts/patch-zt-peer-info-struct.py for why this cannot be
+            // a memcpy: ZT_Peer and zts_peer_info_t do not share a layout
+            // past latency, and a raw memcpy(pr, peer, sizeof(zts_peer_info_t))
+            // reads past the end of the real ZT_Peer object.
+            pr->peer_id = peer->address;
+            pr->ver_major = peer->versionMajor;
+            pr->ver_minor = peer->versionMinor;
+            pr->ver_rev = peer->versionRev;
+            pr->latency = peer->latency;
+            pr->role = (zts_peer_role_t)peer->role;
+            pr->path_count = peer->pathCount;
+            pr->unused_0 = 0;
+            const unsigned int path_limit = (peer->pathCount < ZTS_MAX_PEER_NETWORK_PATHS)
+                ? peer->pathCount : ZTS_MAX_PEER_NETWORK_PATHS;
+            for (unsigned int j = 0; j < path_limit; j++) {
                 native_ss_to_zts_ss(&(pr->paths[j].address), &(peer->paths[j].address));
+                pr->paths[j].last_tx = peer->paths[j].lastSend;
+                pr->paths[j].last_rx = peer->paths[j].lastReceive;
+                pr->paths[j].trusted_path_id = peer->paths[j].trustedPathId;
+                pr->paths[j].latency = peer->paths[j].latencyMean;
+                pr->paths[j].expired = peer->paths[j].expired;
+                pr->paths[j].preferred = peer->paths[j].preferred;
             }
             objptr = (void*)pr;
             break;

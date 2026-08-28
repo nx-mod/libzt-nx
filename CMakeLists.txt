@@ -71,7 +71,7 @@ set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(INTERMEDIATE_LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/intermediate)
-if(UNIX)
+if(UNIX OR SWITCH OR CMAKE_SYSTEM_NAME STREQUAL "Switch")
     set(LWIP_PORT_DIR ${PROJ_DIR}/ext/lwip-contrib/ports/unix/port)
 endif()
 
@@ -350,7 +350,11 @@ endif()
 # ------------------------------------------------------------------------------
 
 set(ZT_FLAGS "${ZT_FLAGS} -DZT_SDK=1")
-set(ZT_FLAGS "${ZT_FLAGS} -DZT_USE_MINIUPNPC=1")
+if(NOT SWITCH AND NOT CMAKE_SYSTEM_NAME STREQUAL "Switch")
+    if(NOT SWITCH)
+    set(ZT_FLAGS "${ZT_FLAGS} -DZT_USE_MINIUPNPC=1")
+endif()
+endif()
 set(ZT_FLAGS "${ZT_FLAGS} -D_USING_LWIP_DEFINITIONS_=0")
 
 if (NOT BUILD_WIN)
@@ -512,8 +516,16 @@ endif() # ZTS_ENABLE_JAVA
 # |                                   SOURCES                                  |
 # ------------------------------------------------------------------------------
 
-file(GLOB ztcoreSrcGlob ${ZTO_SRC_DIR}/node/*.cpp
-         ${ZTO_SRC_DIR}/osdep/OSUtils.cpp ${ZTO_SRC_DIR}/osdep/PortMapper.cpp)
+file(GLOB ztcoreSrcGlob
+    ${ZTO_SRC_DIR}/node/*.cpp
+    ${ZTO_SRC_DIR}/osdep/OSUtils.cpp
+    )
+if(SWITCH OR CMAKE_SYSTEM_NAME STREQUAL "Switch")
+    list(REMOVE_ITEM ztcoreSrcGlob
+        ${ZTO_SRC_DIR}/node/VirtualTap.cpp
+        ${ZTO_SRC_DIR}/node/NodeService.cpp
+        ${ZTO_SRC_DIR}/osdep/PortMapper.cpp)
+endif()
 
 file(GLOB libnatpmpSrcGlob ${ZTO_SRC_DIR}/ext/libnatpmp/natpmp.c
     ${ZTO_SRC_DIR}/ext/libnatpmp/wingettimeofday.c
@@ -657,7 +669,8 @@ if(BUILD_STATIC_LIB)
     add_library(
         ${STATIC_LIB_NAME} STATIC
         $<TARGET_OBJECTS:zt_pic> $<TARGET_OBJECTS:zto_pic>
-        $<TARGET_OBJECTS:natpmp_pic> $<TARGET_OBJECTS:miniupnpc_pic>
+        $<$<NOT:$<OR:$<BOOL:${SWITCH}>,$<STREQUAL:${CMAKE_SYSTEM_NAME},Switch>>>:$<TARGET_OBJECTS:natpmp_pic>>
+        $<$<NOT:$<OR:$<BOOL:${SWITCH}>,$<STREQUAL:${CMAKE_SYSTEM_NAME},Switch>>>:$<TARGET_OBJECTS:miniupnpc_pic>>
         $<TARGET_OBJECTS:lwip_pic> ${libztSrcGlob})
     set_target_properties(
         ${STATIC_LIB_NAME}
