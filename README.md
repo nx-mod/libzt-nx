@@ -77,6 +77,66 @@ it, and a real fix in `ZeroTierSockets.h` where `ZTS_DISABLE_CENTRAL_API` was
 `#define`d unconditionally in the header itself, permanently overriding
 CMake's own option for it.
 
+## Caveats
+
+- **The keepalive fix is a workaround, not a root-cause fix.** Why the roots
+  on the test network never answer `VERB_ECHO` -- while reliably answering
+  `HELLO`, and while a non-root peer's `ECHO` was received and processed
+  fine -- was never determined. Receive-side authentication is proven clean
+  (every packet that arrives passes the MAC check), which rules out this
+  fork's own code as the cause, but nothing here explains why the roots
+  themselves don't reply. If that ever gets root-caused, the aggressive
+  10s/14s contact cadence this fork currently uses is very likely more
+  chatty than necessary and could be relaxed back toward upstream's original
+  60s/224s.
+- **Verified against one ZeroTier network, one console, one Atmosphère
+  build.** The ECHO-silence behavior above -- and therefore whether this
+  fork's workaround is even necessary -- hasn't been checked against a
+  second network or a second physical console.
+- **`zts_core_query_path_count()` / `zts_core_query_path()` are stubs.**
+  `NodeService::pathCount()` unconditionally returns `ZTS_ERR_NO_RESULT`;
+  nothing in this fork implements it. Peer-path diagnostics beyond what the
+  `PEER_*` events already report (which are now correct, per the struct fix
+  above) aren't available through this API yet.
+- **`[SWITCH-AUTH]` tracing is debug output, left on by default.** It's
+  compiled in whenever `__SWITCH__` is defined (bounded to the first
+  100-150 events per process, so it can't grow unbounded) and prints to
+  `stderr` unconditionally -- there's no build flag to turn it off
+  separately from Switch itself. Fine for now; would want gating behind its
+  own flag before this is something other people build against by default.
+- **NAT-PMP/UPnP are disabled for Switch, not just re-gated.** That's
+  correct and intentional -- Switch has no router-facing NAT-PMP/UPnP
+  client to speak of -- but it means this fork doesn't attempt automatic
+  port mapping on Switch at all, unlike the desktop platforms this API
+  supports it on.
+- **Only the static-lib Switch target has been built and tested.**
+  `BUILD_SHARED_LIB`, `BUILD_HOST_EXAMPLES`, and `BUILD_HOST_SELFTEST`
+  haven't been tried against the Switch toolchain; they may or may not work
+  as-is.
+- **IPv6 doesn't work on Switch's socket layer** (libnx returns
+  `EAFNOSUPPORT`). ZeroTier's own core still periodically attempts IPv6
+  binds as part of its normal operation; those attempts fail harmlessly and
+  repeatedly rather than being suppressed. Not something this fork changes,
+  just documenting that it's expected, not a bug, if you see it in a log.
+
+## TODO
+
+- Root-cause the ECHO-silence issue instead of working around it (see
+  Caveats above) -- would need visibility this fork's own logging can't
+  provide, most likely packet capture on the actual network path or access
+  to the roots' own logs.
+- Test against a second ZeroTier network and a second console to confirm
+  the ECHO behavior (and thus the need for the keepalive workaround)
+  generalizes rather than being specific to one setup.
+- Implement `NodeService::pathCount()` / `getPathAtIdx()` for real instead
+  of the stub, exposing per-path `lastSend`/`lastReceive`/`alive` state.
+- Gate `[SWITCH-AUTH]` tracing behind its own build flag, separate from
+  `__SWITCH__`, now that it's served its diagnostic purpose (confirming the
+  keepalive issue wasn't an authentication problem).
+- Upstream what's genuinely platform-independent to zerotier/libzt --
+  the peer-info struct-copy fix in particular is a real bug unrelated to
+  Switch and would be a clean, self-contained PR on its own.
+
 ## Building for Switch
 
 Requires [devkitPro](https://devkitpro.org/) (devkitA64) and CMake.
