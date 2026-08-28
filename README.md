@@ -8,6 +8,14 @@ Tested against **Atmosphère 1.11.2-master-5388824be, firmware 22.5.0**.
 Should track other recent Atmosphère releases fine -- nothing here depends on
 a specific Atmosphère internal API, only on the standard libnx toolchain.
 
+> **This build is noisy on purpose, for now.** `[SWITCH-AUTH]` diagnostic
+> tracing is compiled in and left on unconditionally whenever `__SWITCH__`
+> is defined -- expect real `stderr`/log spam (bounded to the first 100-150
+> events per process, so it stops rather than growing forever, but it will
+> show up in any log you're watching). It stays on until the keepalive
+> workaround below is actually root-caused or this tracing gets moved behind
+> its own build flag, whichever happens first -- see Caveats and TODO.
+
 Base: [zerotier/libzt](https://github.com/zerotier/libzt) with
 `ext/ZeroTierOne` bumped to **1.16.2** (upstream commit `fc5c3ec2`).
 `ext/ZeroTierOne`, `ext/lwip`, and `ext/lwip-contrib` are vendored as plain
