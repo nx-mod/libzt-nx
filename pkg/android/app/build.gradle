@@ -1,0 +1,63 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 33
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+                version '3.22.1'
+                arguments "-DZTS_ENABLE_JAVA=ON"
+            }
+        }
+        ndk {
+            // Tells Gradle to build outputs for the following ABIs and package
+            // them into your APK.
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "../../../CMakeLists.txt"
+            version '3.22.1'
+        }
+    }
+
+    ndkVersion '25.1.8937393'
+
+    namespace 'com.example.zerotier'
+    
+    sourceSets {
+        main {
+            java {
+                srcDir 'src/main/java'
+                srcDir '../../../src/bindings/java'
+            }
+        }
+    }
+
+    android.libraryVariants.all { variant ->
+        variant.outputs.all { file ->
+            file.outputFileName = "libzt-${variant.buildType.name}.aar"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
