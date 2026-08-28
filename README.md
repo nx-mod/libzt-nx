@@ -215,3 +215,11 @@ amount of third party code is also included in ZeroTier and is not subject
 to our BSL license -- see [AUTHORS.md](ext/ZeroTierOne/AUTHORS.md) for a
 list of third-party code, where it is included, and the licenses that apply
 to it.
+
+## Special thanks
+
+The Switch portability work this fork builds on -- getting libzt to compile
+and run on libnx at all -- is [AJstylishhh](https://github.com/AJstylishhh)'s,
+from [switch-ldn-zt](https://github.com/AJstylishhh/switch-ldn-zt). This
+fork exists to support and extend that work, not to replace or compete with
+it. Thank you for doing the hard, unglamorous part first.
