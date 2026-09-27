@@ -32,7 +32,11 @@
 #include <string>
 #include <vector>
 
+#if defined(__SWITCH__)
+#define ZT_NETWORK_MAX_INCOMING_UPDATES 1	/* each is a config-sized dictionary */
+#else
 #define ZT_NETWORK_MAX_INCOMING_UPDATES 3
+#endif
 #define ZT_NETWORK_MAX_UPDATE_CHUNKS	((ZT_NETWORKCONFIG_DICT_CAPACITY / 1024) + 1)
 
 namespace ZeroTier {
@@ -500,11 +504,11 @@ class Network {
 
 	AtomicCounter __refCount;
 
-	prometheus::simpleapi::gauge_metric_t _num_multicast_groups;
-	prometheus::simpleapi::counter_metric_t _incoming_packets_accepted;
-	prometheus::simpleapi::counter_metric_t _incoming_packets_dropped;
-	prometheus::simpleapi::counter_metric_t _outgoing_packets_accepted;
-	prometheus::simpleapi::counter_metric_t _outgoing_packets_dropped;
+	Metrics::gauge_t _num_multicast_groups;
+	Metrics::counter_t _incoming_packets_accepted;
+	Metrics::counter_t _incoming_packets_dropped;
+	Metrics::counter_t _outgoing_packets_accepted;
+	Metrics::counter_t _outgoing_packets_dropped;
 };
 
 }	// namespace ZeroTier

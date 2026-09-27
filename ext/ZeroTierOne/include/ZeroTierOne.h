@@ -125,22 +125,38 @@ extern "C" {
 /**
  * Maximum number of pushed routes on a network
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_NETWORK_ROUTES 16	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_NETWORK_ROUTES 128
+#endif
 
 /**
  * Maximum number of statically assigned IP addresses per network endpoint using ZT address management (not DHCP)
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_ZT_ASSIGNED_ADDRESSES 8	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_ZT_ASSIGNED_ADDRESSES 32
+#endif
 
 /**
  * Maximum number of "specialists" on a network -- bridges, relays, etc.
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_NETWORK_SPECIALISTS 32	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_NETWORK_SPECIALISTS 512
+#endif
 
 /**
  * Maximum number of multicast group subscriptions per network
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_NETWORK_MULTICAST_SUBSCRIPTIONS 256	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_NETWORK_MULTICAST_SUBSCRIPTIONS 4096
+#endif
 
 /**
  * Rules engine revision ID, which specifies rules engine capabilities
@@ -150,17 +166,29 @@ extern "C" {
 /**
  * Maximum number of base (non-capability) network rules
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_NETWORK_RULES 128	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_NETWORK_RULES 1024
+#endif
 
 /**
  * Maximum number of per-member capabilities per network
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_NETWORK_CAPABILITIES 8	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_NETWORK_CAPABILITIES 128
+#endif
 
 /**
  * Maximum number of per-member tags per network
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_NETWORK_TAGS 8	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_NETWORK_TAGS 128
+#endif
 
 /**
  * Maximum number of direct network paths to a given peer
@@ -175,7 +203,11 @@ extern "C" {
 /**
  * Maximum number of rules per capability
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_CAPABILITY_RULES 16	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_CAPABILITY_RULES 64
+#endif
 
 /**
  * Maximum number of certificates of ownership to assign to a single network member
@@ -190,7 +222,11 @@ extern "C" {
 /**
  * Maximum number of multicast groups a device / network interface can be subscribed to at once
  */
+#if defined(__SWITCH__)
+#define ZT_MAX_MULTICAST_SUBSCRIPTIONS 64	/* Switch profile, see README-switch.md */
+#else
 #define ZT_MAX_MULTICAST_SUBSCRIPTIONS 1024
+#endif
 
 /**
  * Maximum value for link quality (min is 0)

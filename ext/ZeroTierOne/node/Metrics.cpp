@@ -6,6 +6,7 @@
  * https://www.zerotier.com/
  */
 
+#if !defined(__SWITCH__)
 // clang-format off
 #include <prometheus/simpleapi.h>
 #include <prometheus/histogram.h>
@@ -160,3 +161,4 @@ prometheus::simpleapi::counter_metric_t pool_errors { "controller_pgsql_connecti
 #endif
 }	// namespace Metrics
 }	// namespace ZeroTier
+#endif	// !__SWITCH__ (see Metrics.hpp: metrics are no-ops there)

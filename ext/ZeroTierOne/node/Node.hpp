@@ -27,7 +27,11 @@
 #include <vector>
 
 // Bit mask for "expecting reply" hash
+#if defined(__SWITCH__)
+#define ZT_EXPECTING_REPLIES_BUCKET_MASK1 63	/* 8 KiB table instead of 32 KiB */
+#else
 #define ZT_EXPECTING_REPLIES_BUCKET_MASK1 255
+#endif
 #define ZT_EXPECTING_REPLIES_BUCKET_MASK2 31
 
 namespace ZeroTier {
@@ -314,7 +318,7 @@ class Node : public NetworkController::Sender {
 	uint32_t _expectingRepliesTo[ZT_EXPECTING_REPLIES_BUCKET_MASK1 + 1][ZT_EXPECTING_REPLIES_BUCKET_MASK2 + 1];
 
 	// Time of last identity verification indexed by InetAddress.rateGateHash() -- used in IncomingPacket::_doHELLO() via rateGateIdentityVerification()
-	int64_t _lastIdentityVerification[16384];
+	int64_t _lastIdentityVerification[ZT_RATE_GATE_TABLE_SIZE];
 
 	// Statistics about stuff happening
 	volatile ZT_NodeStatistics _stats;

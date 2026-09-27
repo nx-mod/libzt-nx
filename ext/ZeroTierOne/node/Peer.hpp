@@ -723,12 +723,12 @@ class Peer {
 	SharedPtr<Bond> _bond;
 
 #ifndef ZT_NO_PEER_METRICS
-	prometheus::Histogram<uint64_t>& _peer_latency;
-	prometheus::simpleapi::gauge_metric_t _alive_path_count;
-	prometheus::simpleapi::gauge_metric_t _dead_path_count;
-	prometheus::simpleapi::counter_metric_t _incoming_packet;
-	prometheus::simpleapi::counter_metric_t _outgoing_packet;
-	prometheus::simpleapi::counter_metric_t _packet_errors;
+	Metrics::histogram_ref_t _peer_latency;
+	Metrics::gauge_t _alive_path_count;
+	Metrics::gauge_t _dead_path_count;
+	Metrics::counter_t _incoming_packet;
+	Metrics::counter_t _outgoing_packet;
+	Metrics::counter_t _packet_errors;
 #endif
 };
 

@@ -13,7 +13,13 @@ namespace prometheus {
   class SaveToFile {
     std::chrono::seconds      period        { 1 };
     std::string               filename;
+#if defined(__SWITCH__)
+    /* Nothing reads metrics.prom on the console, and this thread is created while static initializers run,
+     * where a Horizon sysmodule cannot make one: it is left out (stop/restart/~ become no-ops). */
+    std::thread               worker_thread;
+#else
     std::thread               worker_thread { &SaveToFile::worker_function, this };
+#endif
     std::shared_ptr<Registry> registry_ptr  { nullptr };
     bool                      must_die      { false };
 
@@ -52,17 +58,19 @@ namespace prometheus {
 
     void stop() {
       must_die = true;
-      worker_thread.join();
+      if (worker_thread.joinable()) worker_thread.join();
     }
 
     void restart() {
+#if !defined(__SWITCH__)
       must_die = false;
       worker_thread = std::thread(&SaveToFile::worker_function, this);
+#endif
     }
 
     ~SaveToFile() {
       must_die = true;
-      worker_thread.join();
+      if (worker_thread.joinable()) worker_thread.join();
     }
 
     SaveToFile(std::shared_ptr<Registry>& registry_, const std::chrono::seconds& period_, const std::string& filename_) {

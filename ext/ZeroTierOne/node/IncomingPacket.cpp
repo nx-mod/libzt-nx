@@ -459,6 +459,16 @@ bool IncomingPacket::_doHELLO(const RuntimeEnvironment* RR, void* tPtr, const bo
 			return true;
 		}
 
+#if defined(__SWITCH__)
+		// Learn the identity from a root instead of checking it here. locallyValidate() needs a 2 MiB scratch
+		// buffer; a WHOIS answer from an upstream is accepted without it (see _doOK, VERB_WHOIS), so this
+		// is the trust ZeroTier already gives identities it looks up. This HELLO is dropped; the peer
+		// resends, and by then it is known.
+		RR->sw->requestWhois(tPtr, now, id.address());
+		RR->t->incomingPacketDroppedHELLO(tPtr, _path, pid, fromAddress, "unknown peer: identity requested from root");
+		return true;
+#endif
+
 		// Check rate limits
 		if (! RR->node->rateGateIdentityVerification(now, _path->address())) {
 			RR->t->incomingPacketDroppedHELLO(tPtr, _path, pid, fromAddress, "rate limit exceeded");

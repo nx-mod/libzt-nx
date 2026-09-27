@@ -64,7 +64,11 @@
 #define ZT_BINDER_REFRESH_PERIOD 30000
 
 // Max number of bindings
+#if defined(__SWITCH__)
+#define ZT_BINDER_MAX_BINDINGS 16	 // a console has one or two interfaces
+#else
 #define ZT_BINDER_MAX_BINDINGS 256
+#endif
 
 // Maximum physical interface name length. This number is gigantic because of Windows.
 #define ZT_MAX_PHYSIFNAME 256

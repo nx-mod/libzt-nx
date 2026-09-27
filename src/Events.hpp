@@ -106,6 +106,12 @@ class Events {
     /**
      * Enable callback event processing
      */
+    /** True once an event handler is set; until then events are dropped. */
+    bool isEnabled() const
+    {
+        return _enabled;
+    }
+
     void enable();
 
     /**

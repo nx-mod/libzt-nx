@@ -998,8 +998,10 @@ class OneServiceImpl : public OneService {
 		_ports[1] = 0;
 		_ports[2] = 0;
 
+#if !defined(__SWITCH__)
 		prometheus::simpleapi::saver.set_delay(std::chrono::seconds(5));
 		prometheus::simpleapi::saver.set_out_file(_homePath + ZT_PATH_SEPARATOR + "metrics.prom");
+#endif
 
 #if ZT_VAULT_SUPPORT
 		curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -2942,6 +2944,7 @@ class OneServiceImpl : public OneService {
 			}
 		}
 
+#if !defined(__SWITCH__)
 		bool enableMetrics = OSUtils::jsonBool(settings["enableMetrics"], false);
 		if (enableMetrics) {
 			prometheus::simpleapi::saver.set_registry(prometheus::simpleapi::registry_ptr);
@@ -2950,6 +2953,7 @@ class OneServiceImpl : public OneService {
 			std::shared_ptr<prometheus::Registry> registry;
 			prometheus::simpleapi::saver.set_registry(registry);
 		}
+#endif
 	}
 
 #if ZT_VAULT_SUPPORT

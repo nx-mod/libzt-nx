@@ -914,7 +914,11 @@ template <typename HANDLER_PTR_TYPE> class Phy {
 	 */
 	inline void poll(unsigned long timeout)
 	{
+#if defined(__SWITCH__)
+		char buf[16384];	 // on the stack of a 128 KiB thread; ZeroTier packets are under 10 KiB
+#else
 		char buf[131072];
+#endif
 		struct sockaddr_storage ss;
 		struct timeval tv;
 		fd_set rfds, wfds, efds;

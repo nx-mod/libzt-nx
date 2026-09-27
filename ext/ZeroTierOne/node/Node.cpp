@@ -86,9 +86,13 @@ Node::Node(void* uptr, void* tptr, const struct ZT_Node_Config* config, const st
 			throw ZT_EXCEPTION_INVALID_IDENTITY;
 		}
 
+#if !defined(__SWITCH__)
+		// Not on the Switch: this is the node's own identity, read back from its own storage, and the
+		// memory-hard check costs a 2 MiB buffer a sysmodule cannot spare.
 		if (! RR->identity.locallyValidate()) {
 			throw ZT_EXCEPTION_INVALID_IDENTITY;
 		}
+#endif
 	}
 
 	if (n <= 0) {

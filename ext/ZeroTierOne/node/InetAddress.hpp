@@ -601,7 +601,7 @@ struct InetAddress : public sockaddr_storage {
 				h += ((unsigned long)ip[5]);
 			} break;
 		}
-		return (h & 0x3fff);
+		return (h & (ZT_RATE_GATE_TABLE_SIZE - 1));
 	}
 
 	/**

@@ -1275,6 +1275,11 @@ void Packet::cryptField(const void* key, unsigned int start, unsigned int len)
 
 bool Packet::compress()
 {
+#if defined(__SWITCH__)
+	// Compression is optional in the protocol (peers accept uncompressed packets). Its LZ4 state and output
+	// buffer take ~36 KiB of stack, on every send path, on threads that have 128 KiB.
+	return false;
+#endif
 	char* const data = reinterpret_cast<char*>(unsafeData());
 	char buf[ZT_PROTO_MAX_PACKET_LENGTH * 2];
 

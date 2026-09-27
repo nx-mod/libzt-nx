@@ -20,6 +20,24 @@
 
 #include <algorithm>
 
+// Packets (~10 KiB each) as locals put this function's frame at ~60 KiB, all reserved on entry whichever branch
+// runs. On the Switch it can run on a 128 KiB thread under a whole socket call chain, so they go on the heap.
+// The heap there is a small fixed pool: an allocation that fails drops the frame (logged) rather than crashing.
+#if defined(__SWITCH__)
+#include <memory>
+#include <new>
+#define ZT_STACK_SAVING_LOCAL(T, name, ...)                                              \
+	std::unique_ptr<T> name##_storage(new (std::nothrow) T { __VA_ARGS__ });           \
+	if (! name##_storage) {                                                              \
+		if (Metrics::zt_stub_hit)                                                                 \
+			Metrics::zt_stub_hit("multicast: out of memory, frame dropped");                     \
+		return;                                                                          \
+	}                                                                                    \
+	T& name = *name##_storage
+#else
+#define ZT_STACK_SAVING_LOCAL(T, name, ...) T name { __VA_ARGS__ }
+#endif
+
 namespace ZeroTier {
 
 Multicaster::Multicaster(const RuntimeEnvironment* renv) : RR(renv), _groups(32)
@@ -142,7 +160,11 @@ std::vector<Address> Multicaster::getMembers(uint64_t nwid, const MulticastGroup
 
 void Multicaster::send(void* tPtr, int64_t now, const SharedPtr<Network>& network, const Address& origin, const MulticastGroup& mg, const MAC& src, unsigned int etherType, const void* data, unsigned int len)
 {
+#if defined(__SWITCH__)
+	unsigned long idxbuf[64];	// 32 KiB less stack; bigger groups use the heap path below
+#else
 	unsigned long idxbuf[4096];
+#endif
 	unsigned long* indexes = idxbuf;
 
 	// If we're in hub-and-spoke designated multicast replication mode, see if we
@@ -173,7 +195,7 @@ void Multicaster::send(void* tPtr, int64_t now, const SharedPtr<Network>& networ
 					}
 				}
 				if (bestMulticastReplicator) {
-					Packet outp(bestMulticastReplicator->address(), RR->identity.address(), Packet::VERB_MULTICAST_FRAME);
+					ZT_STACK_SAVING_LOCAL(Packet, outp, bestMulticastReplicator->address(), RR->identity.address(), Packet::VERB_MULTICAST_FRAME);
 					outp.append((uint64_t)network->id());
 					outp.append((uint8_t)0x0c);	  // includes source MAC | please replicate
 					((src) ? src : MAC(RR->identity.address(), network->id())).appendTo(outp);
@@ -219,7 +241,7 @@ void Multicaster::send(void* tPtr, int64_t now, const SharedPtr<Network>& networ
 
 		if (gs.members.size() >= limit) {
 			// Skip queue if we already have enough members to complete the send operation
-			OutboundMulticast out;
+			ZT_STACK_SAVING_LOCAL(OutboundMulticast, out);
 
 			out.init(
 				RR,
@@ -295,7 +317,7 @@ void Multicaster::send(void* tPtr, int64_t now, const SharedPtr<Network>& networ
 
 				for (unsigned int k = 0; k < numExplicitGatherPeers; ++k) {
 					const CertificateOfMembership* com = (network) ? ((network->config().com) ? &(network->config().com) : (const CertificateOfMembership*)0) : (const CertificateOfMembership*)0;
-					Packet outp(explicitGatherPeers[k], RR->identity.address(), Packet::VERB_MULTICAST_GATHER);
+					ZT_STACK_SAVING_LOCAL(Packet, outp, explicitGatherPeers[k], RR->identity.address(), Packet::VERB_MULTICAST_GATHER);
 					outp.append(network->id());
 					outp.append((uint8_t)((com) ? 0x01 : 0x00));
 					mg.mac().appendTo(outp);
@@ -310,6 +332,45 @@ void Multicaster::send(void* tPtr, int64_t now, const SharedPtr<Network>& networ
 				}
 			}
 
+#if defined(__SWITCH__)
+			// Queued frames wait for members to be gathered; while no peer answers (right after start, or after
+			// a wake) nothing drains them until clean(). Drop expired ones now and bound the total, or ARP retries
+			// fill the pool. The list node is ~30 KiB: probe for it, since the module's operator new returns null.
+			unsigned long queued = 0;
+			{
+				Multicaster::Key* qk = (Multicaster::Key*)0;
+				MulticastGroupStatus* qs = (MulticastGroupStatus*)0;
+				Hashtable<Multicaster::Key, MulticastGroupStatus>::Iterator qi(_groups);
+				while (qi.next(qk, qs)) {
+					for (std::list<OutboundMulticast>::iterator tx(qs->txQueue.begin()); tx != qs->txQueue.end();) {
+						if (tx->expired(now)) {
+							qs->txQueue.erase(tx++);
+						}
+						else {
+							++tx;
+							++queued;
+						}
+					}
+				}
+			}
+			if (queued >= ZT_TX_QUEUE_TOTAL) {
+				if (gs.txQueue.empty()) {
+					if (Metrics::zt_stub_hit)
+						Metrics::zt_stub_hit("multicast: queue full, frame dropped");
+					throw 0;   // leaves through the catch below, which frees indexes
+				}
+				gs.txQueue.pop_front();
+			}
+			{
+				void* probe = ::operator new(sizeof(OutboundMulticast) + 64, std::nothrow);
+				if (! probe) {
+					if (Metrics::zt_stub_hit)
+						Metrics::zt_stub_hit("multicast: out of memory, frame dropped");
+					throw 0;
+				}
+				::operator delete(probe);
+			}
+#endif
 			gs.txQueue.push_back(OutboundMulticast());
 			OutboundMulticast& out = gs.txQueue.back();
 

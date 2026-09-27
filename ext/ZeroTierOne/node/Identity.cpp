@@ -28,6 +28,34 @@
 namespace ZeroTier {
 
 // A memory-hard composition of SHA-512 and Salsa20 for hashcash hashing
+#if defined(__SWITCH__)
+/* The memory-hard hash needs a 2 MiB scratch buffer, more than a sysmodule keeps free. The embedding program
+ * lends it only for the duration of one hash (weak hooks: without them, plain new/delete as upstream). A null
+ * buffer fails the operation instead of crashing it. */
+extern "C" void* zt_genmem_acquire(unsigned long size) __attribute__((weak));
+extern "C" void zt_genmem_release(void* p) __attribute__((weak));
+static inline char* _genmemAcquire()
+{
+	return zt_genmem_acquire ? (char*)zt_genmem_acquire(ZT_IDENTITY_GEN_MEMORY) : new char[ZT_IDENTITY_GEN_MEMORY];
+}
+static inline void _genmemRelease(char* p)
+{
+	if (zt_genmem_release)
+		zt_genmem_release(p);
+	else
+		delete[] p;
+}
+#else
+static inline char* _genmemAcquire()
+{
+	return new char[ZT_IDENTITY_GEN_MEMORY];
+}
+static inline void _genmemRelease(char* p)
+{
+	delete[] p;
+}
+#endif
+
 static inline void _computeMemoryHardHash(const void* publicKey, unsigned int publicKeyBytes, void* digest, void* genmem)
 {
 	// Digest publicKey[] to obtain initial digest
@@ -84,7 +112,10 @@ struct _Identity_generate_cond {
 void Identity::generate()
 {
 	unsigned char digest[64];
-	char* genmem = new char[ZT_IDENTITY_GEN_MEMORY];
+	char* genmem = _genmemAcquire();
+	if (! genmem) {
+		return;	  // no scratch memory: the identity stays empty (nil address) rather than crashing
+	}
 
 	ECC::Pair kp;
 	do {
@@ -98,7 +129,7 @@ void Identity::generate()
 	}
 	*_privateKey = kp.priv;
 
-	delete[] genmem;
+	_genmemRelease(genmem);
 }
 
 bool Identity::locallyValidate() const
@@ -108,9 +139,12 @@ bool Identity::locallyValidate() const
 	}
 
 	unsigned char digest[64];
-	char* genmem = new char[ZT_IDENTITY_GEN_MEMORY];
+	char* genmem = _genmemAcquire();
+	if (! genmem) {
+		return false;
+	}
 	_computeMemoryHardHash(_publicKey.data, ZT_ECC_PUBLIC_KEY_SET_LEN, digest, genmem);
-	delete[] genmem;
+	_genmemRelease(genmem);
 
 	unsigned char addrb[5];
 	_address.copyTo(addrb, 5);

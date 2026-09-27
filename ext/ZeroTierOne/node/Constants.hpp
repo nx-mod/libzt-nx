@@ -204,7 +204,9 @@
 #define ZT_PACKED_STRUCT(D) D __attribute__((packed))
 #endif
 
-#if defined(_WIN32)
+#if defined(__SWITCH__)
+#define ZT_PLATFORM_NAME "nx-mod"	 // Nintendo Switch (Horizon) via nx-mod; shown by the controller as the node's OS
+#elif defined(_WIN32)
 #define ZT_PLATFORM_NAME "windows"	 // Windows
 #elif defined(_WIN64)
 #define ZT_PLATFORM_NAME "windows"	 // Windows
@@ -303,12 +305,28 @@
 /**
  * Size of RX queue
  */
+/* Per-source rate gate for identity checks (Node::rateGateIdentityVerification): one int64 per slot. */
+#if defined(__SWITCH__)
+#define ZT_RATE_GATE_TABLE_SIZE 1024	/* 8 KiB instead of 128 KiB */
+#else
+#define ZT_RATE_GATE_TABLE_SIZE 16384
+#endif
+
+#if defined(__SWITCH__)
+#define ZT_RX_QUEUE_SIZE 4	/* each slot holds a packet and 6 fragments, ~70 KiB */
+#else
 #define ZT_RX_QUEUE_SIZE 32
+#endif
 
 /**
  * Size of TX queue
  */
+#if defined(__SWITCH__)
+#define ZT_TX_QUEUE_SIZE 2	/* each entry is ~30 KiB; ARP makes one group per target IP */
+#define ZT_TX_QUEUE_TOTAL 4	/* across all groups (Multicaster::send) */
+#else
 #define ZT_TX_QUEUE_SIZE 32
+#endif
 
 /**
  * Minimum delay between timer task checks to prevent thrashing
@@ -747,12 +765,23 @@
 /**
  * Desired buffer size for UDP sockets (used in service and osdep but defined here)
  */
+#if defined(__SWITCH__)
+/* 0: leave the socket's buffers at the process's configured size. Phy::udpBind otherwise asks for 1 MiB and
+ * steps down until it gets something, which on a Switch takes nearly all of the module's socket buffer
+ * memory and leaves no room for another socket (ENOBUFS). ZeroTier packets are under 1.5 KiB. */
+#define ZT_UDP_DESIRED_BUF_SIZE 0
+#else
 #define ZT_UDP_DESIRED_BUF_SIZE 1048576
+#endif
 
 /**
  * Desired / recommended min stack size for threads (used on some platforms to reset thread stack size)
  */
+#if defined(__SWITCH__)
+#define ZT_THREAD_MIN_STACK_SIZE 131072	/* a sysmodule has under 2 MiB in all; packets (~10 KiB) live on the stack */
+#else
 #define ZT_THREAD_MIN_STACK_SIZE 1048576
+#endif
 
 // Exceptions thrown in core ZT code
 #define ZT_EXCEPTION_OUT_OF_BOUNDS										 100

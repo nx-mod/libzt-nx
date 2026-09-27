@@ -220,7 +220,7 @@ sys_thread_new(const char *name, lwip_thread_fn function, void *arg, int stacksi
 #ifdef __SWITCH__
   pthread_attr_t switch_attr;
   pthread_attr_init(&switch_attr);
-  pthread_attr_setstacksize(&switch_attr, 256 * 1024);
+  pthread_attr_setstacksize(&switch_attr, 128 * 1024);  /* tcpip thread: sends into ZeroTier (Multicaster::send ~60 KiB) */
   code = pthread_create(&tmp, &switch_attr, thread_wrapper, thread_data);
 #ifdef __SWITCH__
   printf("[SWITCH-DIAG] STN: AFTER_PTHREAD_CREATE\n");

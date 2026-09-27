@@ -962,7 +962,8 @@ void NodeService::nodeEventCallback(enum ZT_Event event, const void* metaData)
 
 void NodeService::sendEventToUser(unsigned int zt_event_code, const void* obj, unsigned int len)
 {
-    if (! _events) {
+    // Without a handler the event would be built (a zts_net_info_t is ~26 KiB) only to be dropped.
+    if (! _events || ! _events->isEnabled()) {
         return;
     }
 
@@ -1661,12 +1662,35 @@ void NodeService::nodeStatePutFunction(
         // little effect on others.
         f = fopen(p, "rb");
         if (f) {
+#if defined(__SWITCH__)
+            // Compared in small chunks: this runs on whichever thread joins a network, and a 64 KiB buffer on
+            // the stack overflowed a sysmodule thread.
+            char buf[1024];
+            bool same = true;
+            unsigned long off = 0;
+            for (;;) {
+                const long l = (long)fread(buf, 1, sizeof(buf), f);
+                if (l <= 0) {
+                    break;
+                }
+                if (((off + (unsigned long)l) > len) || (memcmp((const char*)data + off, buf, l) != 0)) {
+                    same = false;
+                    break;
+                }
+                off += (unsigned long)l;
+            }
+            fclose(f);
+            if (same && (off == len)) {
+                return;
+            }
+#else
             char buf[65535] = { 0 };
             long l = (long)fread(buf, 1, sizeof(buf), f);
             fclose(f);
             if ((l == (long)len) && (memcmp(data, buf, l) == 0)) {
                 return;
             }
+#endif
         }
 
         f = fopen(p, "wb");
