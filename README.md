@@ -1,225 +1,85 @@
 # libzt-nx
 
-A fork of [ZeroTier's libzt](https://github.com/zerotier/libzt) ported to run
-on **Nintendo Switch under Atmosphère CFW**, plus two correctness fixes found
-on real hardware and not yet upstreamed.
+[ZeroTier's libzt](https://github.com/zerotier/libzt) for the **Nintendo Switch under Atmosphère**, small
+enough to run inside a system module. Tested on Atmosphère 1.11.2, firmware 22.5.0.
 
-Tested against **Atmosphère 1.11.2-master-5388824be, firmware 22.5.0**.
-Should track other recent Atmosphère releases fine -- nothing here depends on
-a specific Atmosphère internal API, only on the standard libnx toolchain.
+## Credits
 
-> **This build is noisy on purpose, for now.** `[SWITCH-AUTH]` diagnostic
-> tracing is compiled in and left on unconditionally whenever `__SWITCH__`
-> is defined -- expect real `stderr`/log spam (bounded to the first 100-150
-> events per process, so it stops rather than growing forever, but it will
-> show up in any log you're watching). It stays on until the keepalive
-> workaround below is actually root-caused or this tracing gets moved behind
-> its own build flag, whichever happens first -- see Caveats and TODO.
+- **[AJstylishhh](https://github.com/AJstylishhh)** -- the Switch port itself (CMake platform detection, lwIP
+  thread-safety and Unix-port fixes, PHY checksums, POSIX header guards), from
+  [switch-ldn-zt](https://github.com/AJstylishhh/switch-ldn-zt). This fork builds on that work.
+- **[ZeroTier](https://github.com/zerotier)** -- libzt and ZeroTierOne (1.16.2, `fc5c3ec2`).
+- **[lwIP](https://savannah.nongnu.org/projects/lwip/)** -- the TCP/IP stack.
+- **nx-mod** -- the fixes and system-module profile below.
 
-Base: [zerotier/libzt](https://github.com/zerotier/libzt) with
-`ext/ZeroTierOne` bumped to **1.16.2** (upstream commit `fc5c3ec2`).
-`ext/ZeroTierOne`, `ext/lwip`, and `ext/lwip-contrib` are vendored as plain
-source here rather than git submodules -- one self-contained repo instead of
-three that have to stay in lockstep, and ZeroTierOne in particular has moved
-little upstream in recent years. History starts fresh at this fork rather
-than carrying libzt's own commit history forward, since this is a heavy
-restructure (vendored deps, a different platform target), not something
-meant to track upstream commit-by-commit.
+## What's different
 
-## What's different from upstream libzt
+All Switch changes are under `__SWITCH__`; other platforms build as upstream.
 
-**Switch portability** -- CMake platform detection, lwIP thread-safety and
-Unix-port fixes, PHY checksum handling, various POSIX header/include guards
-(`ifaddrs.h`, `sys/un.h`, `sys/uio.h`, `endian.h`, `strtok_r` -> `strtok`) --
-is [AJstylishhh](https://github.com/AJstylishhh)'s work from
-[switch-ldn-zt](https://github.com/AJstylishhh/switch-ldn-zt), carried over
-here so this builds standalone without a separate patch-script pipeline at
-build time.
+**Fixes found on hardware**
+- *Node dropped offline every 30-90 s.* Roots answered HELLO but never ECHO, and upstreams were contacted only
+  every 224 s. Upstream contact now happens every 14 s (ping period 10 s). A workaround: why ECHO goes
+  unanswered is unknown.
+- *`zts_peer_info_t` was filled by `memcpy` from a differently laid out `ZT_Peer`* (garbage `path_count`, reads
+  past the object). Now copied field by field.
+- Hardening from upstream `misc-fixes` (identity NULL/bounds checks, `C25519` -> `ECC`, `ZTS_DISABLE_CENTRAL_API`
+  no longer forced on in the header).
 
-**Two real bugs**, found and fixed while getting ZeroTier working reliably on
-a real console:
+**System-module profile** (a sysmodule has ~2 MiB of heap and small stacks)
+- Metrics are empty stubs; the first use of each is reported through the weak hook `zt_stub_hit()`.
+- Smaller tables and queues: RX queue 4, rate gates 1024, Phy poll buffer 16 KiB, 16 bindings; 128 KiB thread
+  stacks; no 1 MiB UDP socket buffer requests; big packet locals moved to the heap.
+- Multicast TX queue bounded (2 per group, 4 in all) and pruned on send. Each entry is ~30 KiB and ARP opens a
+  group per target, so while no peer answered, the queue used to exhaust the heap in seconds. A failed
+  allocation drops the frame instead of crashing.
+- The 2 MiB identity-hash buffer is borrowed only when needed, through `zt_genmem_acquire()` /
+  `zt_genmem_release()`. Unknown HELLOs are resolved with a WHOIS to a root instead of a local hash.
+- Packet compression off; events nobody enabled are not queued; platform reported as `nx-mod`.
+- NAT-PMP/UPnP are compiled out.
 
-- **Node stayed "online" for only ~30-90s at a time, then dropped, then came
-  back, repeating forever.** A node only counts as online while it has heard
-  from an upstream (root) within `ZT_PEER_ACTIVITY_TIMEOUT` (30s). Between
-  full HELLOs that contact is meant to be refreshed by small encrypted
-  `VERB_ECHO` keepalives -- but on the test network used here, roots reliably
-  answer HELLO and never answer ECHO (confirmed at both the socket level and,
-  separately, via authentication tracing: every packet that *did* arrive from
-  a root passed auth cleanly, ruling out a receive-side bug). `Node.cpp`'s
-  `_PingPeersThatNeedPing` deliberately contacts upstreams "as infrequently
-  as possible" -- a role-based timer scale of 16, i.e. every
-  `ZT_PATH_HEARTBEAT_PERIOD * 16` == 224 seconds -- and returns before a full
-  HELLO is ever considered. Scale 1 (14s) plus `ZT_PEER_PING_PERIOD` lowered
-  to 10s puts full-HELLO upstream contact inside the 30s window. Derived
-  path-expiration constants are pinned to their original absolute values so
-  only contact cadence changes. **Why roots don't answer ECHO on that network
-  is still unexplained** -- this fix works around it, not around its cause.
+## Embedding
 
-- **`zts_peer_info_t` reported garbage for `path_count` (and would in
-  principle read past the end of the real object).** The peer-event dispatch
-  did `memcpy(pr, peer, sizeof(zts_peer_info_t))` from a `ZT_Peer*`, assuming
-  an identical field layout between `ZT_Peer` and `zts_peer_info_t`. They
-  diverge completely past `latency` -- confirmed by comparing both headers
-  field-by-field, and by a `PEER_PATH_DISCOVERED` event on hardware printing
-  a `path_count` of 0 right next to it, since the event itself is gated on
-  the real `ZT_Peer` field before the broken copy runs. Since the two structs
-  are also different sizes, the memcpy could read past the real `ZT_Peer`
-  object into whatever memory follows it. Replaced with an explicit
-  field-by-field copy.
+Define these in the program linking the library (all optional; weak):
 
-**Also included**: `[SWITCH-AUTH]` diagnostic tracing in `IncomingPacket.cpp`
-(auth/MAC rejection, both call sites) and `Peer.cpp` (accepted packets),
-gated behind `#ifdef __SWITCH__` so it compiles out entirely on every other
-platform. This is what was used to confirm the keepalive fix above wasn't
-masking an authentication problem.
+```c
+void  zt_stub_hit(const char *what);           /* a stubbed feature was used (log it) */
+void *zt_genmem_acquire(unsigned long size);   /* 2 MiB for an identity hash; NULL to refuse */
+void  zt_genmem_release(void *p);
+```
 
-**Also picked up** from zerotier/libzt's `misc-fixes` branch (which sits
-directly on the same base commit this fork started from, so these carried
-over cleanly): NULL/bounds-check hardening in `NodeService.cpp`'s identity
-handling (a commented-out guard previously left `strlen()` able to
-dereference NULL and a caller-supplied length able to overrun a fixed
-buffer), the required `C25519` -> `ECC` rename in `Utilities.cpp` (removed
-upstream in the 1.16.2 jump) with the capacity-check hardening that came with
-it, and a real fix in `ZeroTierSockets.h` where `ZTS_DISABLE_CENTRAL_API` was
-`#define`d unconditionally in the header itself, permanently overriding
-CMake's own option for it.
+Traffic over the ZeroTier network must use `zts_bsd_*` calls. Plain `socket()`/`bind()` compile just as well
+but bind to the physical interface and never see ZeroTier traffic.
+
+In a system module: run every `zts_*` call on one thread with a large stack (128 KiB), and keep newlib's
+per-thread state available to libzt's threads (libnx threads, not bare kernel threads).
 
 ## Caveats
 
-- **The keepalive fix is a workaround, not a root-cause fix.** Why the roots
-  on the test network never answer `VERB_ECHO` -- while reliably answering
-  `HELLO`, and while a non-root peer's `ECHO` was received and processed
-  fine -- was never determined. Receive-side authentication is proven clean
-  (every packet that arrives passes the MAC check), which rules out this
-  fork's own code as the cause, but nothing here explains why the roots
-  themselves don't reply. If that ever gets root-caused, the aggressive
-  10s/14s contact cadence this fork currently uses is very likely more
-  chatty than necessary and could be relaxed back toward upstream's original
-  60s/224s.
-- **Verified against one ZeroTier network, one console, one Atmosphère
-  build.** The ECHO-silence behavior above -- and therefore whether this
-  fork's workaround is even necessary -- hasn't been checked against a
-  second network or a second physical console.
-- **`zts_core_query_path_count()` / `zts_core_query_path()` are stubs.**
-  `NodeService::pathCount()` unconditionally returns `ZTS_ERR_NO_RESULT`;
-  nothing in this fork implements it. Peer-path diagnostics beyond what the
-  `PEER_*` events already report (which are now correct, per the struct fix
-  above) aren't available through this API yet.
-- **`[SWITCH-AUTH]` tracing is debug output, left on by default.** It's
-  compiled in whenever `__SWITCH__` is defined (bounded to the first
-  100-150 events per process, so it can't grow unbounded) and prints to
-  `stderr` unconditionally -- there's no build flag to turn it off
-  separately from Switch itself. Fine for now; would want gating behind its
-  own flag before this is something other people build against by default.
-- **NAT-PMP/UPnP are disabled for Switch, not just re-gated.** That's
-  correct and intentional -- Switch has no router-facing NAT-PMP/UPnP
-  client to speak of -- but it means this fork doesn't attempt automatic
-  port mapping on Switch at all, unlike the desktop platforms this API
-  supports it on.
-- **Only the static-lib Switch target has been built and tested.**
-  `BUILD_SHARED_LIB`, `BUILD_HOST_EXAMPLES`, and `BUILD_HOST_SELFTEST`
-  haven't been tried against the Switch toolchain; they may or may not work
-  as-is.
-- **IPv6 doesn't work on Switch's socket layer** (libnx returns
-  `EAFNOSUPPORT`). ZeroTier's own core still periodically attempts IPv6
-  binds as part of its normal operation; those attempts fail harmlessly and
-  repeatedly rather than being suppressed. Not something this fork changes,
-  just documenting that it's expected, not a bug, if you see it in a log.
-
-## TODO
-
-- Root-cause the ECHO-silence issue instead of working around it (see
-  Caveats above) -- would need visibility this fork's own logging can't
-  provide, most likely packet capture on the actual network path or access
-  to the roots' own logs.
-- Test against a second ZeroTier network and a second console to confirm
-  the ECHO behavior (and thus the need for the keepalive workaround)
-  generalizes rather than being specific to one setup.
-- Implement `NodeService::pathCount()` / `getPathAtIdx()` for real instead
-  of the stub, exposing per-path `lastSend`/`lastReceive`/`alive` state.
-- Gate `[SWITCH-AUTH]` tracing behind its own build flag, separate from
-  `__SWITCH__`, now that it's served its diagnostic purpose (confirming the
-  keepalive issue wasn't an authentication problem).
-- Upstream what's genuinely platform-independent to zerotier/libzt --
-  the peer-info struct-copy fix in particular is a real bug unrelated to
-  Switch and would be a clean, self-contained PR on its own.
+- Diagnostic tracing (`[SWITCH-AUTH]`, `[SWITCH-DIAG]`) is on whenever `__SWITCH__` is defined; to be moved
+  behind its own flag.
+- `zts_core_query_path_count()` / `zts_core_query_path()` are stubs.
+- IPv6 binds fail on Switch (`EAFNOSUPPORT`) and are retried harmlessly.
+- Only the static library is built and tested for Switch.
 
 ## Building for Switch
 
-Requires [devkitPro](https://devkitpro.org/) (devkitA64) and CMake.
+devkitPro (devkitA64) and CMake:
 
 ```sh
-export DEVKITPRO=/opt/devkitpro
-export DEVKITA64=/opt/devkitpro/devkitA64
-export PATH="$DEVKITA64/bin:$DEVKITPRO/tools/bin:$PATH"
-
 cmake -S . -B build-switch \
-  -DCMAKE_TOOLCHAIN_FILE=<path-to-switch.toolchain.cmake> \
-  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_STATIC_LIB=ON -DBUILD_SHARED_LIB=OFF \
-  -DBUILD_HOST_EXAMPLES=OFF -DBUILD_HOST_SELFTEST=OFF \
+  -DCMAKE_TOOLCHAIN_FILE=<switch.toolchain.cmake> -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+  -DCMAKE_BUILD_TYPE=Release -DSWITCH=ON \
+  -DBUILD_STATIC_LIB=ON -DBUILD_SHARED_LIB=OFF -DBUILD_HOST_EXAMPLES=OFF -DBUILD_HOST_SELFTEST=OFF \
   -DALLOW_INSTALL_TARGET=OFF -DZTS_DISABLE_CENTRAL_API=ON \
-  -DSWITCH=ON \
-  -DCMAKE_C_FLAGS="-D__SWITCH__ -DSWITCH -DFD_SETSIZE=1024 -D__BSD_VISIBLE=1 -D__POSIX_VISIBLE=200809 -D_DEFAULT_SOURCE -DLWIP_PROVIDE_ERRNO=1 -I<this-repo>/ext -I<this-repo>/ext/lwip-contrib/ports/unix/port/include" \
-  -DCMAKE_CXX_FLAGS="<same as above>"
-
-cmake --build build-switch --target zt-static --parallel 4
+  -DCMAKE_C_FLAGS="-D__SWITCH__ -DSWITCH -DFD_SETSIZE=1024 -D__BSD_VISIBLE=1 -D__POSIX_VISIBLE=200809 -D_DEFAULT_SOURCE -DLWIP_PROVIDE_ERRNO=1 -I<repo>/ext -I<repo>/ext/lwip-contrib/ports/unix/port/include" \
+  -DCMAKE_CXX_FLAGS="<same>"
+cmake --build build-switch --target zt-static
 ```
 
-Produces `build-switch/lib/libzt.a`. A `switch.toolchain.cmake` example
-(setting the aarch64-none-elf devkitA64 toolchain and `CMAKE_SYSTEM_NAME` to
-`Switch`) lives in the consuming project; `-DSWITCH=ON` plus
-`CMAKE_SYSTEM_NAME STREQUAL "Switch"` are both checked throughout this
-repo's `CMakeLists.txt`, so either is sufficient to opt into the Switch code
-paths (both are set together above for clarity, not because both are
-required).
+Produces `build-switch/lib/libzt.a`. `ext/endian.h` and `ext/arpa/inet.h` stand in for headers libnx lacks.
+Other platforms: as upstream (`build.sh` / `build.ps1`). API docs: [docs.zerotier.com](https://docs.zerotier.com/sockets/tutorial.html).
 
-`ext/endian.h` and `ext/arpa/inet.h` are committed compatibility stubs for
-headers libnx doesn't provide; they're picked up automatically by the `-I
-<this-repo>/ext` flag above.
+## License
 
-### The `zts_bsd_*` API, not plain sockets
-
-Any code using this library on Switch that needs to talk over the ZeroTier
-virtual network **must** use `zts_bsd_socket()` / `zts_bsd_bind()` /
-`zts_bsd_sendto()` / `zts_bsd_recvfrom()`, not plain `socket()`/`bind()`/etc.
-A consuming app can (and typically will) also `-Wl,--wrap=socket` etc. to
-route its *own* real network I/O (talking to roots, the controller) through
-the physical interface -- that's a separate, legitimate use of the same
-plain POSIX names. But anything meant to ride the ZeroTier tunnel itself has
-to go through the `zts_bsd_*` names specifically; the two APIs look
-identical and both compile fine, so getting this wrong doesn't fail to
-build, it just silently binds to the wrong interface and never sees the
-traffic it's listening for.
-
-## Building for everything else
-
-Unchanged from upstream libzt -- see `build.sh` / `build.ps1`, or the CMake
-invocation above with `-DBUILD_HOST=ON` and no Switch-specific flags.
-
-## Upstream docs
-
-For the ZeroTier Sockets API itself (not the Switch port): [Docs](https://docs.zerotier.com/sockets/tutorial.html) | [Examples](./examples) | [ZeroTier issue tracker](https://github.com/zerotier/libzt/issues)
-
-## Licensing
-
-ZeroTier and the ZeroTier SDK (libzt and libztcore) are licensed under the
-[BSL version 1.1](./LICENSE.txt). ZeroTier is free to use internally in
-businesses and academic institutions and for non-commercial purposes.
-Certain types of commercial use such as building closed-source apps and
-devices based on ZeroTier or offering ZeroTier network controllers and
-network management as a SaaS service require a commercial license. A small
-amount of third party code is also included in ZeroTier and is not subject
-to our BSL license -- see [AUTHORS.md](ext/ZeroTierOne/AUTHORS.md) for a
-list of third-party code, where it is included, and the licenses that apply
-to it.
-
-## Special thanks
-
-The Switch portability work this fork builds on -- getting libzt to compile
-and run on libnx at all -- is [AJstylishhh](https://github.com/AJstylishhh)'s,
-from [switch-ldn-zt](https://github.com/AJstylishhh/switch-ldn-zt). This
-fork exists to support and extend that work, not to replace or compete with
-it. Thank you for doing the hard, unglamorous part first.
+ZeroTier and libzt are under the [BSL 1.1](./LICENSE.txt); third-party code is listed in
+[AUTHORS.md](ext/ZeroTierOne/AUTHORS.md).
